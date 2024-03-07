@@ -123,6 +123,11 @@ class Package:
 			result.append((fobj.read(file_size), fname))
 		return result
 
+	def check_file_by_hash(self, hash_num, langid=0, mode=0):
+		hash_info = self.map[mode]
+		hashmap = hash_info[langid]
+		return hash_num in hashmap
+
 	def del_hash_files(self, hash_num, mode):
 		hash_map = self.map[mode]
 		for i in hash_map:

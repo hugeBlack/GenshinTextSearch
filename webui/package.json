@@ -1,0 +1,23 @@
+{
+  "name": "guanghe_webui",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@flaticon/flaticon-uicons": "^2.4.0",
+    "axios": "^1.6.7",
+    "dayjs": "^1.11.9",
+    "element-plus": "^2.3.12",
+    "flaticon": "^0.1.0",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.3.1",
+    "vite": "^5.1.4"
+  }
+}

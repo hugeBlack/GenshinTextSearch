@@ -1,11 +1,12 @@
 import sqlite3
 from contextlib import closing
 
-conn = sqlite3.connect("test.db")
+# 没人会给一个词典搞高并发吧？
+conn = sqlite3.connect("test.db",check_same_thread=False)
 
 
 def selectTextMapFromKeyword(keyWord: str, langCode: int):
-    # [hash, content]
+    # [hash] 反正最后还得去数据库查一遍目标语言，不如不查content
     with closing(conn.cursor()) as cursor:
         sql1 = "select hash, content from textMap where lang=? and content like '%{}%' limit 200".format(keyWord)
         cursor.execute(sql1, (langCode,))

@@ -32,3 +32,12 @@ def getAudioBin(path: str, langCode: int):
         return wenBin
     except FileNotFoundError:
         return None  # 文件被米删了
+
+
+def checkAudioBin(path: str, langCode: int):
+    if langCode not in langCodes:
+        raise "No voice-over for this language!"
+    langStr = langCodes[langCode]
+    hashVal = fnv_hash_64((langStr + "\\" + path).lower())
+    return jpPack.check_file_by_hash(hashVal, langid=0, mode=2)
+
