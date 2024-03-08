@@ -6,6 +6,8 @@ import { onBeforeMount, onMounted, reactive, ref, watch } from "vue";
 import UserInfoCard from "@/components/UserInfoCard.vue";
 import globalData from "@/global/global"
 import { ElMenuItem, ElSubMenu } from "element-plus";
+import global from "@/global/global";
+import api from "@/api/basicInfo";
 
 function loginButtonClicked() {
     router.push("/login")
@@ -15,19 +17,8 @@ const menuItemClick = (ke) => {
     router.push(ke.index)
 }
 
-const exitButtonClicked = async () => {
-    await loginApi.logout();
-    window.location.href = "/";
-}
 
 const notificationBox = ref();
-const notificationButtonClicked = () => {
-    userInfo.data.unread_notification = false;
-}
-
-const updateNotifications = () => {
-    notificationBox.value.getNotification();
-}
 
 const avatarClicked = () => {
     if (!isLogin.value) {
@@ -38,6 +29,7 @@ const avatarClicked = () => {
 const menus = reactive({
     v: [
         { "title": "首页", "icon": "fi-rr-home", "path": "/" },
+        { "title": "设置", "icon": "fi-rr-settings", "path": "/settings" },
     ]
 });
 
@@ -59,11 +51,6 @@ const loadComplete = ref(true);
 const gotUserInfo = ref(false)
 
 
-menus.v = [
-    { "title": "首页", "icon": "fi-rr-home", "path": "/" },
-]
-
-
 
 
 const getSidebarPath = () => {
@@ -79,7 +66,9 @@ const getSidebarPath = () => {
 
 const menu = ref();
 let contentDom = undefined;
-onMounted(() => {
+const loaded = ref(false)
+
+onMounted(async () => {
     (() => {
         let menuItemNow = getSidebarPath();
         for (let item of menus.v) {
@@ -92,6 +81,11 @@ onMounted(() => {
         }
         contentDom = document.querySelector(".content")
     })()
+
+    global.languages = (await api.getImportedTextLanguages()).json
+    global.voiceLanguages = (await api.getImportedVoiceLanguages()).json
+    console.log(global)
+    loaded.value = true
 })
 
 
@@ -134,7 +128,7 @@ watch(router.currentRoute, () => {
             </div>
 
             <div class="content">
-                <RouterView></RouterView>
+                <RouterView v-if="loaded"></RouterView>
             </div>
         </div>
     </div>

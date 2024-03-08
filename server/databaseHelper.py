@@ -70,5 +70,10 @@ def selectVoicePathFromTextHashInDialogue(textHash: int):
         return None
 
 
-if __name__ == "__main__":
-    print(selectVoicePathFromTextHashInFetter(2276797319))
+def getImportedTextMapLangs():
+    # [(id, displayName)]
+    with closing(conn.cursor()) as cursor:
+        sql1 = "select id,displayName from langCode where imported=1"
+        cursor.execute(sql1,)
+        matches = cursor.fetchall()
+        return matches

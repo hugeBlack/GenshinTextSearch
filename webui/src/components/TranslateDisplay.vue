@@ -27,12 +27,15 @@ const getLines = (translate) => {
  * @type {Audio}
  */
 let audio = undefined
-let audioUrl = undefined
+let audioUrl = {}
 
 const playVoice = async (voicePaths, langCode) =>{
-    if(audioUrl && audio){
+    if(audio){
         audio.pause()
-        audio = new Audio(audioUrl)
+    }
+
+    if(audioUrl[langCode]){
+        audio = new Audio(audioUrl[langCode])
         audio.play()
         return
     }
@@ -40,7 +43,7 @@ const playVoice = async (voicePaths, langCode) =>{
     let buffer = await api.getVoiceOver(voicePaths, langCode)
     let url = await converter.convertBufferedArray(buffer)
     audio = new Audio(url)
-    audioUrl = url
+    audioUrl[langCode] = url
     audio.play()
 }
 
@@ -57,9 +60,12 @@ watch(props, ()=>{
 
         <div class="translate" v-for="(translate, translateKey) in props.translateObj.translates">
             <p class="info">{{global.languages[translateKey]}}:
-                <el-tooltip v-for="voice in props.translateObj.voicePaths" :content="global.languages[translateKey] + '/' + voice">
-                    <el-icon @click="playVoice(voice, translateKey)"><VideoPlay /></el-icon>
-                </el-tooltip>
+                <span v-if="global.voiceLanguages[translateKey]">
+                    <el-tooltip v-for="voice in props.translateObj.voicePaths" :content="voice">
+                        <el-icon @click="playVoice(voice, translateKey)"><VideoPlay /></el-icon>
+                    </el-tooltip>
+                </span>
+
             </p>
             <p v-for="line in getLines(translate)">
                 {{line}}

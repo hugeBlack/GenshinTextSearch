@@ -61,15 +61,7 @@ const getVoiceOver = async (voicePath, langCode) => {
 };
 
 
-const getLangCode = () => {
-    // return {
-    //     1: "Chinese",
-    //     4: "English(US)",
-    //     9: "Japaneses"
-    // }
 
-    return request.get("/api/getLangCode");
-};
 
 const changeRecord = (params) => {
     return request.post("/api/volunteer/changeVolunteerInfo", params);
@@ -79,5 +71,4 @@ export default {
     queryBaidu,
     queryByKeyword,
     getVoiceOver,
-    getLangCode,
 };

@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, request, send_file, make_response
 import controllers
 from flask_cors import CORS
+
 app = Flask(__name__)
 CORS(app)
-
 
 
 def buildResponse(data=None, code=200, msg="ok"):
@@ -14,14 +14,14 @@ def buildResponse(data=None, code=200, msg="ok"):
     })
 
 
-@app.route("/api/getLangCode")
-def hello():
-    return buildResponse({
-        1: "Chinese",
-        4: "English(US)",
-        9: "Japanese",
-        10: "Korean"
-    })
+@app.route("/api/getImportedTextLanguages")
+def getImportedTextLanguages():
+    return buildResponse(controllers.getImportedTextMapLangs())
+
+
+@app.route("/api/getImportedVoiceLanguages")
+def getImportedVoiceLanguages():
+    return buildResponse(controllers.getLoadedVoicePacks())
 
 
 @app.route("/api/keywordQuery", methods=['POST'])

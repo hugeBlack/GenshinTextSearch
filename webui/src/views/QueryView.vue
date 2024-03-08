@@ -43,7 +43,6 @@ const keyword = ref("")
 const supportedInputLanguage = ref({})
 
 onBeforeMount(async ()=>{
-    global.languages = (await api.getLangCode()).json
     supportedInputLanguage.value = global.languages
 })
     //(()=>{

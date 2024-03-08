@@ -24,7 +24,7 @@ def getTranslateObj(keyword: str, langCode: int):
 
     contents = databaseHelper.selectTextMapFromKeyword(keyword, langCode)
     # TODO 用户可以自定义目标语言
-    langs = [1, 4]
+    langs = [1, 4, 9]
 
     for content in contents:
         obj = {'translates': {}, 'voicePaths': []}
@@ -34,10 +34,9 @@ def getTranslateObj(keyword: str, langCode: int):
 
         voicePath, origin = selectVoicePathFromTextHash(content[0])
         if voicePath is not None:
-            print(voicePath)
             voiceExist = False
             for lang in langs:
-                if languagePackReader.checkAudioBin(voicePath, lang):
+                if lang in languagePackReader.langPackages and languagePackReader.checkAudioBin(voicePath, lang):
                     voiceExist = True
                     break
 
@@ -56,3 +55,19 @@ def getVoiceBinStream(voicePath, langCode):
     if wemBin is None:
         return None
     return io.BytesIO(wemBin)
+
+
+def getLoadedVoicePacks():
+    ans = {}
+    for packId in languagePackReader.langPackages:
+        ans[packId] = languagePackReader.langCodes[packId]
+
+    return ans
+
+def getImportedTextMapLangs():
+    langs = databaseHelper.getImportedTextMapLangs()
+    ans = {}
+    for langItem in langs:
+        ans[langItem[0]] = langItem[1]
+
+    return ans
