@@ -1,6 +1,9 @@
+import os.path
+
 from flask import Flask, jsonify, request, send_file, make_response
 import controllers
 from flask_cors import CORS
+from flask import send_from_directory
 
 app = Flask(__name__)
 CORS(app)
@@ -27,7 +30,10 @@ def getImportedVoiceLanguages():
 @app.route("/api/keywordQuery", methods=['POST'])
 def keywordQuery():
     langCode = request.json['langCode']
-    keyword = request.json['keyword']
+    keyword: str = request.json['keyword']
+
+    if keyword.strip() == "":
+        return buildResponse([])
 
     return buildResponse(controllers.getTranslateObj(keyword, langCode))
 
@@ -70,6 +76,23 @@ def getConfig():
     return buildResponse(controllers.getConfig())
 
 
+staticDir = r"../webui/dist/"
+
+
+@app.route('/')
+def serveRoot():
+    return send_from_directory(staticDir, 'index.html')
+
+
+@app.route("/<path:path>")
+def serveStatic(path):
+    filePath = staticDir + path
+    if os.path.exists(filePath):
+        return send_from_directory(staticDir, path)
+    else:
+        return send_from_directory(staticDir, 'index.html')
+
+
 # Run the server if this script is executed directly
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

@@ -4,7 +4,7 @@ import json
 
 DATA_PATH = r'G:\AnimeGameData'
 
-conn = sqlite3.connect("test.db")
+conn = sqlite3.connect("../test.db")
 
 
 def importTextMap(mapName: str):

@@ -1,37 +1,69 @@
 <template>
     <div class="viewWrapper">
-        <div class="mt-4">
-            <el-input
-                v-model="keyword"
-                style="max-width: 600px"
-                placeholder="请输入关键词"
-                class="input-with-select"
-            >
-                <template #prepend>
-                    <el-select v-model="selectedInputLanguage" placeholder="Select" class="languageSelector" >
-                        <el-option v-for="(v,k) in supportedInputLanguage" :label="v" :value="k" :key="k"/>
-                    </el-select>
-                </template>
-                <template #append>
-                    <el-button :icon="Search" @click="onQueryButtonClicked"/>
-                </template>
-            </el-input>
-
-            <div>
-                <TranslateDisplay v-for="translate in queryResult" :translate-obj="translate" class="translate"></TranslateDisplay>
-            </div>
+        <h1 class="pageTitle">关键词检索</h1>
+        <div class="helpText">
+            <p>使用关键词对游戏的指定语言的文本进行检索。</p>
+            <p>检索结果中,可能有对应配音的结果会被排序在前面。</p>
         </div>
+
+
+        <el-input
+            v-model="keyword"
+            style="max-width: 600px;"
+            placeholder="请输入关键词"
+            class="input-with-select"
+            @keyup.enter.native="onQueryButtonClicked"
+        >
+            <template #prepend>
+                <el-select v-model="selectedInputLanguage" placeholder="Select" class="languageSelector" >
+                    <el-option v-for="(v,k) in supportedInputLanguage" :label="v" :value="k" :key="k"/>
+                </el-select>
+            </template>
+            <template #append>
+                <el-button :icon="Search" @click="onQueryButtonClicked"/>
+            </template>
+        </el-input>
+
+
+        <div>
+            <TranslateDisplay v-for="translate in queryResult" :translate-obj="translate" class="translate" @onVoicePlay="onVoicePlay" />
+        </div>
+    </div>
+
+    <div class="viewWrapper voicePlayerContainer" v-show="showPlayer && queryResult.length > 0">
+        <span class="hideIcon" @click="onHidePlayerButtonClicked">
+            <el-icon>
+                <Close />
+            </el-icon>
+        </span>
+
+        <AudioPlayer
+
+            ref="voicePlayer"
+            :audio-list="audio"
+            :show-prev-button="false"
+            :show-next-button="false"
+            :is-loop="false"
+            :progress-interval="25"
+            theme-color="var(--el-color-primary)">
+
+        </AudioPlayer>
+    </div>
+
+    <div class="showPlayerButton" @click="onShowPlayerButtonClicked" v-show="!showPlayer && queryResult.length > 0">
+        <i class="fi fi-sr-waveform-path"></i>
     </div>
 
 </template>
 
 <script setup>
 import {onBeforeMount, ref} from 'vue';
-import { Delete, Download, Plus, ZoomIn } from '@element-plus/icons-vue';
+import {Close, Delete, Download, Plus, ZoomIn} from '@element-plus/icons-vue';
 import { Search } from '@element-plus/icons-vue'
 import global from "@/global/global"
 import api from "@/api/keywordQuery"
 import TranslateDisplay from "@/components/TranslateDisplay.vue";
+import AudioPlayer from "@liripeng/vue-audio-player";
 
 const queryLanguages = [1,4]
 
@@ -45,17 +77,19 @@ const supportedInputLanguage = ref({})
 onBeforeMount(async ()=>{
     supportedInputLanguage.value = global.languages
 })
-    //(()=>{
-//     let ans = []
-//     for(let k in global.languages){
-//         ans.push({"val": k, "name": global.languages[k]})
-//     }
-//     console.log(ans)
-//     return ans
-// })()
+
+/**
+ *
+ * @type {Ref<AudioPlayer>}
+ */
+const voicePlayer = ref()
+const showPlayer = ref(false)
+let firstShowPlayer = true
 
 const onQueryButtonClicked = async () =>{
     let ans = (await api.queryByKeyword(keyword.value, selectedInputLanguage.value)).json
+    // 停止语音播放
+    voicePlayer.value.pause()
     // 去重，合并相同的语音条目
     let resultMap = new Map()
     for(let item of ans){
@@ -99,6 +133,44 @@ const onQueryButtonClicked = async () =>{
     queryResult.value.push(...noVoiceEntries)
 }
 
+// 播放器相关开始
+const audio = ref([])
+
+
+
+const onHidePlayerButtonClicked = () => {
+    showPlayer.value = false
+}
+
+const onShowPlayerButtonClicked = () => {
+    showPlayer.value = true
+}
+
+const onVoicePlay = (voiceUrl) => {
+    if(firstShowPlayer){
+        showPlayer.value = true;
+        firstShowPlayer = false
+    }
+
+    if(audio.value.length > 0 && voiceUrl === audio.value[0]){
+        if(voicePlayer.value.isPlaying){
+            voicePlayer.value.pause()
+        }else{
+            voicePlayer.value.play()
+        }
+
+    }else{
+        voicePlayer.value.pause()
+        audio.value = [voiceUrl]
+        // 要等一会才能播放
+        setTimeout(()=>{
+            voicePlayer.value.play()
+        }, 0)
+
+    }
+
+}
+
 
 </script>
 
@@ -123,4 +195,53 @@ const onQueryButtonClicked = async () =>{
 .translate:not(:last-child){
     border-bottom: 1px solid #ccc;
 }
+
+.voicePlayerContainer {
+    margin-top: 10px;
+    bottom: 0;
+    position: sticky !important;
+    box-shadow: 0 0 5px 5px rgba(36,37,38,.05);
+}
+
+.showPlayerButton{
+    position: absolute;
+    right: 7.5%;
+    bottom: 80px;
+    height: 70px;
+    width: 70px;
+    border-radius: 50%;
+    background-color: var(--el-color-primary);
+    color: #fff;
+    font-size: 25px;
+    box-shadow: 0 6px 15px rgba(36,37,38,.2);
+    text-align: center;
+    line-height: 75px;
+    cursor: pointer;
+}
+
+.showPlayerButton:hover{
+    background-color: var(--el-color-primary-light-3);
+}
+
+.hideIcon {
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.hideIcon:hover {
+    color: #888;
+}
+
+.pageTitle {
+    border-bottom: 1px #ccc solid;
+    padding-bottom: 10px;
+}
+
+.helpText {
+    margin: 20px 0 20px 0;
+    color: #999;
+}
+
 </style>

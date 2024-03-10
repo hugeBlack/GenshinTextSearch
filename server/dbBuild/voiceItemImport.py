@@ -5,7 +5,7 @@ from contextlib import closing
 
 DATA_PATH = r'G:\AnimeGameData'
 
-conn = sqlite3.connect("test.db")
+conn = sqlite3.connect("../test.db")
 
 avatars: 'list[tuple[int,str]]' = []
 
