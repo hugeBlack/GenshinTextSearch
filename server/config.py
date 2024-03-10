@@ -7,7 +7,8 @@ config = {
     ],
 
     "defaultSearchLanguage": 4,
-    "assetDir": ""
+    "assetDir": "",
+    "sourceLanguage": 1
 }
 
 
@@ -27,6 +28,9 @@ def loadConfig():
     if "defaultSearchLanguage" in fileJson and fileJson["defaultSearchLanguage"] is int:
         config["defaultSearchLanguage"] = fileJson["defaultSearchLanguage"]
 
+    if "sourceLanguage" in fileJson and fileJson['sourceLanguage'] is int:
+        config['sourceLanguage'] = fileJson['sourceLanguage']
+
 
 def saveConfig():
     fp = open("config.json", encoding='utf-8', mode="w")
@@ -42,12 +46,20 @@ def setResultLanguages(newLanguages: list[int]):
     config["resultLanguages"] = newLanguages
 
 
+def setSourceLanguage(newSourceLanguage: int):
+    config['sourceLanguage'] = newSourceLanguage
+
+
 def getDefaultSearchLanguage():
     return config['defaultSearchLanguage']
 
 
 def getResultLanguages():
     return config["resultLanguages"]
+
+
+def getSourceLanguage():
+    return config['sourceLanguage']
 
 
 def getAssetDir():

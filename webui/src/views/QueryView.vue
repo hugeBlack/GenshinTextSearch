@@ -23,6 +23,9 @@
                 <el-button :icon="Search" @click="onQueryButtonClicked"/>
             </template>
         </el-input>
+        <span class="searchSummary">
+            {{ searchSummary }}
+        </span>
 
 
         <div>
@@ -73,6 +76,7 @@ const queryResult = ref([])
 const selectedInputLanguage = ref(global.config.defaultSearchLanguage + '')
 const keyword = ref("")
 const supportedInputLanguage = ref({})
+const searchSummary = ref("")
 
 onBeforeMount(async ()=>{
     supportedInputLanguage.value = global.languages
@@ -90,14 +94,33 @@ const onQueryButtonClicked = async () =>{
     let ans = (await api.queryByKeyword(keyword.value, selectedInputLanguage.value)).json
     // 停止语音播放
     voicePlayer.value.pause()
+
+    let searchSummaryTmp = `查询用时: ${ans.time.toFixed(2)}ms，`
+    if(ans.contents.length > 0){
+        if(ans.contents.length >= 200){
+            searchSummaryTmp += `共 ≥200 条结果`
+        }else{
+            searchSummaryTmp += `共 ${ans.contents.length} 条结果`
+        }
+
+    }else{
+        searchSummaryTmp += `没有找到结果。`
+        searchSummary.value = searchSummaryTmp
+        queryResult.value = []
+        return
+    }
+
+    let mergedCount = 0
     // 去重，合并相同的语音条目
     let resultMap = new Map()
-    for(let item of ans){
+    for(let item of ans.contents){
         let key = item.translates[queryLanguages[0]]
         if(!resultMap.has(key)){
             resultMap.set(key, item)
             continue
         }
+        mergedCount++;
+
         let oldItem = resultMap.get(key)
         let voicePathsToAdd = []
         for(let newVoicePath of item.voicePaths){
@@ -131,6 +154,13 @@ const onQueryButtonClicked = async () =>{
 
 
     queryResult.value.push(...noVoiceEntries)
+
+    if(mergedCount > 0){
+        searchSummaryTmp += `，已合并 ${mergedCount} 条重复结果。`
+    }else{
+        searchSummaryTmp += '。'
+    }
+    searchSummary.value = searchSummaryTmp
 }
 
 // 播放器相关开始
@@ -242,6 +272,12 @@ const onVoicePlay = (voiceUrl) => {
 .helpText {
     margin: 20px 0 20px 0;
     color: #999;
+}
+
+.searchSummary{
+    margin-left: 10px;
+    color: var(--el-input-text-color, var(--el-text-color-regular));
+    font-size: 14px;
 }
 
 </style>

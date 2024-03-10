@@ -86,7 +86,6 @@ onMounted(async () => {
     global.voiceLanguages = (await api.getImportedVoiceLanguages()).json
     global.config = (await api.getConfig()).json
 
-    console.log(global)
     loaded.value = true
 })
 

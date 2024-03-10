@@ -13,6 +13,11 @@
                     <el-option v-for="(v,k) in supportedInputLanguage" :label="v" :value="k" :key="k"/>
                 </el-select>
             </el-form-item>
+            <el-form-item label="来源语言">
+                <el-select v-model="selectedSourceLanguage" placeholder="Select" class="languageSelector" >
+                    <el-option v-for="(v,k) in supportedInputLanguage" :label="v" :value="k" :key="k"/>
+                </el-select>
+            </el-form-item>
             <el-form-item label="结果语言">
                 <el-transfer v-model="transferComponentValue" :data="transferComponentData" :titles="['可选语言', '已选语言']"/>
             </el-form-item>
@@ -41,6 +46,7 @@ import {onBeforeMount, ref} from "vue";
 import {ElMessage} from "element-plus";
 
 const selectedInputLanguage = ref(global.config.defaultSearchLanguage + '')
+const selectedSourceLanguage = ref(global.config.sourceLanguage + '')
 const supportedInputLanguage = ref({})
 
 const transferComponentData = ref([])
@@ -69,14 +75,13 @@ onBeforeMount(async ()=>{
 })
 
 const save = async () => {
-    let newConfig = (await api.saveConfig(transferComponentValue.value, selectedInputLanguage.value)).json
+    let newConfig = (await api.saveConfig(transferComponentValue.value, selectedInputLanguage.value, selectedSourceLanguage.value)).json
 
     global.config.resultLanguages = newConfig.resultLanguages
     global.config.defaultSearchLanguage = newConfig.defaultSearchLanguage
+    global.config.sourceLanguage = newConfig.sourceLanguage
 
     ElMessage({type: "success" ,message:"设置已保存"})
-
-    console.log(global.config)
 }
 </script>
 

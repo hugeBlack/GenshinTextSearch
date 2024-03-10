@@ -12,26 +12,29 @@ const queryBaidu = (keyword) => {
 };
 
 const queryByKeyword = (keyword, langCode) => {
-    // return [
-    //     {
-    //         "type": "Dialogue",
-    //         "origin": "TASK NAME etc.",
-    //         "voicePaths": [],
-    //         "translates":{
-    //             1: "TRANSLATE_CHINESE",
-    //             4: "TRANSLATE_ENGLISH"
+    // return {contents: [
+    //         {
+    //             "type": "Dialogue",
+    //             "origin": "TASK NAME etc.",
+    //             "voicePaths": [],
+    //             "translates":{
+    //                 1: "TRANSLATE_CHINESE",
+    //                 4: "TRANSLATE_ENGLISH"
+    //             }
+    //         },
+    //         {
+    //             "type": "Fetter",
+    //             "origin": "AVATAR NAME etc.",
+    //             "voicePaths": ["VOICE_PATH2"],
+    //             "translates":{
+    //                 1: "TRANSLATE_CHINESE2",
+    //                 4: "TRANSLATE_ENGLISH2"
+    //             }
     //         }
-    //     },
-    //     {
-    //         "type": "Fetter",
-    //         "origin": "AVATAR NAME etc.",
-    //         "voicePaths": ["VOICE_PATH2"],
-    //         "translates":{
-    //             1: "TRANSLATE_CHINESE2",
-    //             4: "TRANSLATE_ENGLISH2"
-    //         }
-    //     }
-    // ]
+    //     ],
+    //     time: 0.01
+    // }
+
     return request.post("/api/keywordQuery", {
         keyword: keyword,
         langCode: langCode

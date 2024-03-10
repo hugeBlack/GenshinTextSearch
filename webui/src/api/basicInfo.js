@@ -21,7 +21,7 @@ const getImportedVoiceLanguages = () => {
     return request.get("/api/getImportedVoiceLanguages");
 }
 
-const saveConfig = (resultLanguages, defaultSearchLanguage) => {
+const saveConfig = (resultLanguages, defaultSearchLanguage, sourceLanguage) => {
     let tmp = []
     for(let code of resultLanguages){
         tmp.push(parseInt(code))
@@ -30,7 +30,8 @@ const saveConfig = (resultLanguages, defaultSearchLanguage) => {
     return request.post("/api/saveSettings", {
         'config' :{
             "resultLanguages": tmp,
-            "defaultSearchLanguage": parseInt(defaultSearchLanguage)
+            "defaultSearchLanguage": parseInt(defaultSearchLanguage),
+            "sourceLanguage": parseInt(sourceLanguage)
         }
     })
 }

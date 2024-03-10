@@ -8,15 +8,26 @@ import config
 def selectVoicePathFromTextHash(textHash: int):
     voicePath: str = databaseHelper.selectVoicePathFromTextHashInDialogue(textHash)
     if voicePath is not None:
-        # TODO 显示任务的名称
-        return voicePath, "WIP-Dialogue"
+        return voicePath
 
     voicePath = databaseHelper.selectVoicePathFromTextHashInFetter(textHash)
     if voicePath is not None:
-        # TODO 显示角色的名称-谈话标题
-        return voicePath, "WIP-Fetter"
+        return voicePath
 
-    return None, None
+    return None
+
+
+def selectVoiceOriginFromTextHash(textHash: int, langCode: int):
+    origin = databaseHelper.getSourceFromDialogue(textHash, langCode)
+    if origin is not None:
+        return origin
+
+    origin = databaseHelper.getSourceFromFetter(textHash, langCode)
+    if origin is not None:
+        return origin
+
+    # TODO 支持更多类型的语音
+    return "其他文本"
 
 
 def getTranslateObj(keyword: str, langCode: int):
@@ -24,8 +35,9 @@ def getTranslateObj(keyword: str, langCode: int):
     ans = []
 
     contents = databaseHelper.selectTextMapFromKeyword(keyword, langCode)
-    # TODO 用户可以自定义目标语言
+
     langs = config.getResultLanguages()
+    sourceLangCode = config.getSourceLanguage()
 
     for content in contents:
         obj = {'translates': {}, 'voicePaths': []}
@@ -33,7 +45,9 @@ def getTranslateObj(keyword: str, langCode: int):
         for translate in translates:
             obj['translates'][translate[1]] = translate[0]
 
-        voicePath, origin = selectVoicePathFromTextHash(content[0])
+        voicePath = selectVoicePathFromTextHash(content[0])
+        origin = selectVoiceOriginFromTextHash(content[0], sourceLangCode)
+
         if voicePath is not None:
             voiceExist = False
             for lang in langs:
@@ -89,3 +103,7 @@ def setResultLanguages(newLanguages: list[int]):
 
 def saveConfig():
     config.saveConfig()
+
+
+def setSourceLanguage(newSourceLanguage):
+    config.setSourceLanguage(newSourceLanguage)

@@ -122,8 +122,76 @@ def importFetters():
     conn.commit()
 
 
+def importQuest(fileName: str):
+    cursor = conn.cursor()
+    obj = json.load(open(DATA_PATH + "\\BinOutput\\Quest\\" + fileName, encoding='utf-8'))
+
+    sql1 = 'insert into quest(questId, titleTextMapHash, chapterId) VALUES (?,?,?)'
+    sql2 = 'insert into questTalk(questId, talkId) values (?,?)'
+
+    if 'id' in obj:
+        keyQuestId = 'id'
+        keyTitleTextMapHash = 'titleTextMapHash'
+        keyChapterId = 'chapterId'
+        keyTalks = 'talks'
+        keyTalkId = 'id'
+    else:
+        keyQuestId = 'CCFPGAKINNB'
+        keyTitleTextMapHash = 'HLAINHJACPJ'
+        keyChapterId = 'FLCLAPBOOHF'
+        keyTalks = 'PCNNNPLAEAI'
+        keyTalkId = 'CCFPGAKINNB'
+
+    questId = obj[keyQuestId]
+
+    if keyTitleTextMapHash in obj:
+        titleTextMapHash = obj[keyTitleTextMapHash]
+    else:
+        titleTextMapHash = None
+        print("questId {} don't have TitleTextMapHash!".format(questId))
+
+    if keyChapterId in obj:
+        chapterId = obj[keyChapterId]
+    else:
+        chapterId = None
+        print("questId {} don't have chapterId!".format(questId))
+
+    cursor.execute(sql1, (questId, titleTextMapHash, chapterId))
+
+    if keyTalks not in obj:
+        print("questId {} don't have talk!".format(questId))
+    else:
+
+        for talk in obj[keyTalks]:
+            talkId = talk[keyTalkId]
+            cursor.execute(sql2, (questId, talkId))
+            pass
+
+    cursor.close()
+
+
+def importAllQuests():
+    files = os.listdir(DATA_PATH + "\\BinOutput\\Quest\\")
+    n = len(files)
+    for val, fileName in enumerate(files):
+        print("Now: {} {}/{}".format(fileName, val, n))
+        importQuest(fileName)
+    conn.commit()
+
+
+def importChapters():
+    cursor = conn.cursor()
+    chapters = json.load(open(DATA_PATH + "\\ExcelBinOutput\\ChapterExcelConfigData.json", encoding='utf-8'))
+    sql1 = "insert into chapter(chapterId, chapterTitleTextMapHash, chapterNumTextMapHash) values (?,?,?)"
+
+    for chapter in chapters:
+        cursor.execute(sql1,(chapter['id'], chapter['chapterTitleTextMapHash'], chapter['chapterNumTextMapHash']))
+
+    cursor.close()
+    conn.commit()
+
 
 if __name__ == "__main__":
-    # importFetters()
+    # importChapters()
     pass
 

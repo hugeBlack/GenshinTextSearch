@@ -1,4 +1,5 @@
 import os.path
+import time
 
 from flask import Flask, jsonify, request, send_file, make_response
 import controllers
@@ -35,7 +36,14 @@ def keywordQuery():
     if keyword.strip() == "":
         return buildResponse([])
 
-    return buildResponse(controllers.getTranslateObj(keyword, langCode))
+    start = time.time()
+    contents = controllers.getTranslateObj(keyword, langCode)
+    end = time.time()
+
+    return buildResponse({
+        'contents': contents,
+        'time': (end - start)*1000
+    })
 
 
 @app.route("/api/getVoiceOver", methods=['POST'])
@@ -65,6 +73,9 @@ def saveSettings():
 
     if 'resultLanguages' in newConfig:
         controllers.setResultLanguages(newConfig['resultLanguages'])
+
+    if 'sourceLanguage' in newConfig:
+        controllers.setSourceLanguage(newConfig['sourceLanguage'])
 
     controllers.saveConfig()
 
