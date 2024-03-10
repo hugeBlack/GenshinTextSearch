@@ -8,7 +8,7 @@
                 class="input-with-select"
             >
                 <template #prepend>
-                    <el-select v-model="selectedInputLanguage" placeholder="Select" class="languageSelector" @change="test" >
+                    <el-select v-model="selectedInputLanguage" placeholder="Select" class="languageSelector" >
                         <el-option v-for="(v,k) in supportedInputLanguage" :label="v" :value="k" :key="k"/>
                     </el-select>
                 </template>
@@ -38,7 +38,7 @@ const queryLanguages = [1,4]
 const queryResult = ref([])
 
 
-const selectedInputLanguage = ref('4')
+const selectedInputLanguage = ref(global.config.defaultSearchLanguage + '')
 const keyword = ref("")
 const supportedInputLanguage = ref({})
 
@@ -100,19 +100,9 @@ const onQueryButtonClicked = async () =>{
 }
 
 
-
-
-const test = (evt) => {
-    console.log(evt)
-}
-
 </script>
 
 <style scoped>
-
-
-
-
 .viewWrapper{
     position: relative;
     width: 85%;

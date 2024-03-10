@@ -51,6 +51,25 @@ def getVoiceOver():
     )
 
 
+@app.route("/api/saveSettings", methods=['POST'])
+def saveSettings():
+    newConfig = request.json['config']
+    if 'defaultSearchLanguage' in newConfig:
+        controllers.setDefaultSearchLanguage(newConfig['defaultSearchLanguage'])
+
+    if 'resultLanguages' in newConfig:
+        controllers.setResultLanguages(newConfig['resultLanguages'])
+
+    controllers.saveConfig()
+
+    return buildResponse(controllers.getConfig())
+
+
+@app.route("/api/getSettings")
+def getConfig():
+    return buildResponse(controllers.getConfig())
+
+
 # Run the server if this script is executed directly
 if __name__ == "__main__":
     app.run(debug=True)

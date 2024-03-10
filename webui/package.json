@@ -1,5 +1,5 @@
 {
-  "name": "guanghe_webui",
+  "name": "genshin_sentence_webui",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@flaticon/flaticon-uicons": "^2.4.0",
+    "@liripeng/vue-audio-player": "^1.5.3",
     "axios": "^1.6.7",
     "dayjs": "^1.11.9",
     "element-plus": "^2.3.12",

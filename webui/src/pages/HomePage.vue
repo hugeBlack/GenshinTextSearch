@@ -84,6 +84,8 @@ onMounted(async () => {
 
     global.languages = (await api.getImportedTextLanguages()).json
     global.voiceLanguages = (await api.getImportedVoiceLanguages()).json
+    global.config = (await api.getConfig()).json
+
     console.log(global)
     loaded.value = true
 })
@@ -100,7 +102,7 @@ watch(router.currentRoute, () => {
         <div class="headerHolder">
             <div class="leftTitle">
                 <!--                <img alt="" src="../assets/logo.png">-->
-                Title
+                Genshin Sentence
             </div>
 
         </div>

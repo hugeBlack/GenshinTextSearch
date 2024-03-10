@@ -49,7 +49,7 @@ const playVoice = async (voicePaths, langCode) =>{
 
 watch(props, ()=>{
     audio = undefined;
-    audioUrl = undefined;
+    audioUrl = {};
 })
 
 </script>

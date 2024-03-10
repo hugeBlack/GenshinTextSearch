@@ -21,7 +21,27 @@ const getImportedVoiceLanguages = () => {
     return request.get("/api/getImportedVoiceLanguages");
 }
 
+const saveConfig = (resultLanguages, defaultSearchLanguage) => {
+    let tmp = []
+    for(let code of resultLanguages){
+        tmp.push(parseInt(code))
+    }
+
+    return request.post("/api/saveSettings", {
+        'config' :{
+            "resultLanguages": tmp,
+            "defaultSearchLanguage": parseInt(defaultSearchLanguage)
+        }
+    })
+}
+
+const getConfig = () => {
+    return request.get("/api/getSettings")
+}
+
 export default {
     getImportedTextLanguages,
-    getImportedVoiceLanguages
+    getImportedVoiceLanguages,
+    getConfig,
+    saveConfig
 }

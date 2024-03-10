@@ -1,17 +1,9 @@
 import os
 
 from AudioReader.FilePackager import Package, fnv_hash_64
+import config
 
-GENSHIN_PATH = r'E:\gs\Genshin Impact Game\YuanShen_Data'
-
-# AUDIO_PATH = r'E:\gs\Genshin Impact Game\YuanShen_Data\StreamingAssets\AudioAssets\Japanese'
-# AUDIO_PATH = r'E:\gs\Genshin Impact Game\YuanShen_Data\Persistent\AudioAssets\English(US)'
-# jpPack = Package()
-# files = os.listdir(AUDIO_PATH)
-#
-# for fileName in files:
-#     fobj = open(AUDIO_PATH + "\\" + fileName, "rb")
-#     jpPack.addfile(fobj)
+GENSHIN_PATH = config.getAssetDir()
 
 langCodes = {
     1: "Chinese",

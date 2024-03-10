@@ -45,7 +45,8 @@ const queryByKeyword = (keyword, langCode) => {
  * @return {Promise<ArrayBuffer|null>}
  */
 const getVoiceOver = async (voicePath, langCode) => {
-    let ans = await axios.post(request.defaults.baseURL + "/api/getVoiceOver", {
+
+    let ans = await axios.post(request.defaults.baseURL ? request.defaults.baseURL: "" + "api/getVoiceOver", {
         voicePath: voicePath,
         langCode: parseInt(langCode)
     }, {

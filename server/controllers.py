@@ -2,6 +2,7 @@ import io
 
 import databaseHelper
 import languagePackReader
+import config
 
 
 def selectVoicePathFromTextHash(textHash: int):
@@ -24,7 +25,7 @@ def getTranslateObj(keyword: str, langCode: int):
 
     contents = databaseHelper.selectTextMapFromKeyword(keyword, langCode)
     # TODO 用户可以自定义目标语言
-    langs = [1, 4, 9]
+    langs = config.getResultLanguages()
 
     for content in contents:
         obj = {'translates': {}, 'voicePaths': []}
@@ -64,6 +65,7 @@ def getLoadedVoicePacks():
 
     return ans
 
+
 def getImportedTextMapLangs():
     langs = databaseHelper.getImportedTextMapLangs()
     ans = {}
@@ -71,3 +73,19 @@ def getImportedTextMapLangs():
         ans[langItem[0]] = langItem[1]
 
     return ans
+
+
+def getConfig():
+    return config.config
+
+
+def setDefaultSearchLanguage(newLanguage: int):
+    config.setDefaultSearchLanguage(newLanguage)
+
+
+def setResultLanguages(newLanguages: list[int]):
+    config.setResultLanguages(newLanguages)
+
+
+def saveConfig():
+    config.saveConfig()
