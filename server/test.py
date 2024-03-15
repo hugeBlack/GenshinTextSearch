@@ -1,86 +1,101 @@
-import sqlite3
-import time
-
-conn = sqlite3.connect("test.db", check_same_thread=False)
-
-
-# 如果是角色语音，则返回角色名+标题，否则返回None
-def getSourceFromFetter(textHash: int):
-    # 获得语音标题
-    cursor = conn.cursor()
-    sql1 = 'select avatarId, content from fetters, textMap where voiceFileTextTextMapHash=? and voiceTitleTextMapHash = hash'
-    cursor.execute(sql1, (textHash,))
-    ans = cursor.fetchall()
-    if len(ans) == 0:
-        return None
-    avatarId, voiceTitle = ans[0]
-
-    # 接下来获得角色名称
-    sql2 = 'select content from avatar, textMap where avatarId=? and avatar.nameTextMapHash=textMap.hash'
-
-    cursor.execute(sql2, (avatarId,))
-    ans2 = cursor.fetchall()
-    if len(ans2) == 0:
-        return None
-    avatarName = ans2[0][0]
-
-    cursor.close()
-    return "{} {}".format(avatarName, voiceTitle)
+class MyDomElement:
+    def __init__(self):
+        self.tagName = None
+        self.tagValue = {}
+        self.children: 'list[MyDomElement | str]' = []
 
 
-# 如果是任务对话，则返回章节号+章节名+任务名，否则返回None
-def getSourceFromDialogue(textHash: int):
-    cursor = conn.cursor()
+# 目标是建立一棵dom树，函数返回以自己为root的dom树，以及自己的结尾位置，对每一行处理
+def closedTagParser(text: str, startIndex: int) -> 'tuple[MyDomElement, int]':
+    ans = MyDomElement()
+    endIndex = len(text)
+    # 下一个要读取的字符i
+    lastIndex = startIndex
+    tagName = ''
+    tagValue = ''
+    # 先读取标签
 
-    # 先搞到talkId
-    sql1 = 'select talkId from dialogue where textHash=?'
-    cursor.execute(sql1, (textHash,))
-    ans = cursor.fetchall()
-    if len(ans) == 0:
-        return None
-    talkId = ans[0][0]
+    tagEnded = False
+    if text[startIndex] == '<':
 
-    # 搞到questId，与任务的标题
-    sql2 = ('select quest.questId, content from questTalk, quest, textMap '
-            'where talkId=? and quest.questId=questTalk.questId and titleTextMapHash=hash')
-    cursor.execute(sql2, (talkId,))
-    ans2 = cursor.fetchall()
-    if len(ans2) == 0:
-        # 应该不会出现吧？
-        return "任务文本"
-    questId, questTitle = ans2[0]
-
-    # 尝试找到任务属于哪个章节
-    sql3 = 'select chapterTitleTextMapHash,chapterNumTextMapHash from chapter, quest where questId=? and quest.chapterId=chapter.chapterId'
-    cursor.execute(sql3, (questId,))
-    ans3 = cursor.fetchall()
-    if len(ans3) == 0:
-        # 没找到对应的章节，直接返回任务标题
-        return questTitle
-    chapterTitleTextMapHash, chapterNumTextMapHash = ans3[0]
-
-    sql4 = 'select content from textMap where hash=?'
-    cursor.execute(sql4, (chapterTitleTextMapHash,))
-    ans4 = cursor.fetchall()
-    if len(ans4) == 0:
-        # 没找到对应的章节名称，直接返回任务标题
-        return questTitle
-
-    chapterTitleText = ans4[0][0]
-
-    cursor.execute(sql4, (chapterNumTextMapHash,))
-    ans5 = cursor.fetchall()
-
-    if len(ans5) > 0:
-        chapterNumText = ans5[0][0]
-        return '{} {} {}'.format(chapterNumText, chapterTitleText, questTitle)
+        tagNameEnded = False
+        # 找到起始标签末尾
+        for i in range(startIndex + 1, endIndex):
+            if text[i] == '>':
+                lastIndex = i + 1
+                tagEnded = True
+                break
+            elif not tagNameEnded and text[i] == '=':
+                tagNameEnded = True
+            else:
+                if not tagNameEnded:
+                    tagName += text[i]
+                else:
+                    tagValue += text[i]
     else:
-        return '{} {}'.format(chapterTitleText, questTitle)
+        # 如果开始不是'<'，则说明第一个元素是一个text类型，要一直读到尾部
+        # 好像没什么要特殊处理的？
+        tagEnded = True
+
+    if not tagEnded:
+        raise Exception("Tag Not Ended at position {}".format(startIndex))
+
+    ans.tagName = tagName
+    ans.tagValue = tagValue
+
+    # 开始扫描后续内容
+    # 遇到<xxx 而不是</xxx 则说明遇到了新元素，要进行递归，把当前读到的元素写到ans里面
+
+    # 不能用for循环因为python的for循环全是迭代器
+    i = lastIndex
+    while i < endIndex:
+        if text[i] == '<':
+            if i != endIndex - 1:
+                if text[i + 1] != '/':
+                    # 遇到新元素了！
+                    ans.children.append(text[lastIndex: i])
+                    child, childEndIndex = closedTagParser(text, i)
+                    ans.children.append(child)
+                    i = childEndIndex
+                    lastIndex = childEndIndex + 1
+                else:
+                    # 遇到同级tag的结尾，检查下是否和自己的tagName相符
+                    if tagName == '':
+                        raise Exception("String tag should NOT have tail tag!")
+                    if i + len(tagName) + 2 > endIndex or text[i + 2: i + 3 + len(tagName)] != tagName + '>':
+                        raise Exception("Tag head and Tail Not Match at {}".format(i))
+                    # 可以结束了
+                    ans.children.append(text[lastIndex:i])
+                    return ans, i + 2 + len(tagName)
+        else:
+            pass
+
+        i += 1
+
+    # 到头了tag还没结束，没提前返回?，检查是否为文本类型，是的话就正常，否则报错
+    if tagName == "":
+        ans.children.append(text[lastIndex: len(text)])
+        return ans, endIndex - 1
+    else:
+        raise Exception("Tag Not Closed!")
+
+
+def tagParse(text: str):
+    if len(text) == 0:
+        return None
+
+    lastIndex = -1
+    ans = []
+    length = len(text)
+    while lastIndex != length - 1:
+        child, lastIndex = closedTagParser(text, lastIndex + 1)
+        ans.append(child)
+
+    return ans
 
 
 if __name__ == "__main__":
-    start = time.time()
-    print(getSourceFromFetter(3472380287))
-    end = time.time()
-    print((end - start)*1000)
+    t = "<color=nmsl>sd<i>hahahahaha</i>sd</color>sasdadsadsadsas"
+    ans1 = tagParse(t)
+    print(ans1)
 

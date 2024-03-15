@@ -13,6 +13,7 @@
             placeholder="请输入关键词"
             class="input-with-select"
             @keyup.enter.native="onQueryButtonClicked"
+            clearable
         >
             <template #prepend>
                 <el-select v-model="selectedInputLanguage" placeholder="Select" class="languageSelector" >
@@ -65,7 +66,7 @@ import {Close, Delete, Download, Plus, ZoomIn} from '@element-plus/icons-vue';
 import { Search } from '@element-plus/icons-vue'
 import global from "@/global/global"
 import api from "@/api/keywordQuery"
-import TranslateDisplay from "@/components/TranslateDisplay.vue";
+import TranslateDisplay from "@/components/ResultEntry.vue";
 import AudioPlayer from "@liripeng/vue-audio-player";
 
 const queryLanguages = [1,4]

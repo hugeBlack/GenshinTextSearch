@@ -2,6 +2,8 @@
 // 显示多语言翻译的组件
 import global from '@/global/global.js'
 import PlayVoiceButton from "@/components/PlayVoiceButton.vue";
+
+import StylizedText from "@/components/StylizedText.vue";
 /**
  *         {
  *             "type": "Dialogue",
@@ -16,13 +18,17 @@ import PlayVoiceButton from "@/components/PlayVoiceButton.vue";
 const props = defineProps(['translateObj'])
 const emit = defineEmits(['onVoicePlay'])
 
-const getLines = (translate) => {
-    return translate.split("\\n")
-}
+
 
 const onVoicePlay = (voiceUrl) => {
     emit('onVoicePlay', voiceUrl)
 }
+/**
+ *
+ * @type {Ref<HTMLElement>}
+ */
+
+
 
 
 
@@ -42,10 +48,7 @@ const onVoicePlay = (voiceUrl) => {
                 </span>
 
             </p>
-            <p v-for="line in getLines(translate)">
-                {{line}}
-            </p>
-
+            <StylizedText :text="translate" />
         </div>
         <p class="info">
             <span class="origin">来源：{{props.translateObj.origin}}</span>
