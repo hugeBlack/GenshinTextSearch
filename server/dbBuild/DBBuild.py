@@ -1,43 +1,9 @@
 import os
 import sqlite3
 import json
-
-DATA_PATH = r'G:\AnimeGameData'
-
-conn = sqlite3.connect("../test.db")
-
-
-def importTextMap(mapName: str):
-    cursor = conn.cursor()
-
-    sql1 = "insert or ignore into langCode(codeName) values (?)"
-    # 创建
-    cursor.execute(sql1, (mapName,))
-    cursor.fetchall()
-
-    sql2 = "select id from langCode where codeName = ?"
-    cursor.execute(sql2, (mapName,))
-    ans2 = cursor.fetchall()
-    langId = ans2[0][0]
-
-    # 加数据
-    sql3 = "insert or ignore into textMap(hash, content, lang) values (?,?,?)"
-    textMap = json.load(open(DATA_PATH + "\\TextMap\\" + mapName, encoding='utf-8'))
-    for hashVal, content in textMap.items():
-        cursor.execute(sql3, (hashVal, content, langId))
-
-    cursor.close()
-    conn.commit()
-
-
-def importAllTextMap():
-    files = os.listdir(DATA_PATH + "\\TextMap")
-    for fileName in files:
-        print("Now: " + fileName)
-        importTextMap(fileName)
-
-
-
+from DBConfig import conn, DATA_PATH
+import voiceItemImport
+from tqdm import tqdm
 
 def importTalk(fileName: str):
     cursor = conn.cursor()
@@ -92,8 +58,8 @@ def importTalk(fileName: str):
 def importAllTalkItems():
     files = os.listdir(DATA_PATH + "\\BinOutput\\Talk\\Quest\\")
     n = len(files)
-    for val, fileName in enumerate(files):
-        print("Now: {} {}/{}".format(fileName, val, n))
+    for val, fileName in tqdm(enumerate(files), total=len(files)):
+        # print("Now: {} {}/{}".format(fileName, val, n))
         importTalk(fileName)
 
 
@@ -154,7 +120,6 @@ def importQuest(fileName: str):
         chapterId = obj[keyChapterId]
     else:
         chapterId = None
-        print("questId {} don't have chapterId!".format(questId))
 
     cursor.execute(sql1, (questId, titleTextMapHash, chapterId))
 
@@ -173,8 +138,8 @@ def importQuest(fileName: str):
 def importAllQuests():
     files = os.listdir(DATA_PATH + "\\BinOutput\\Quest\\")
     n = len(files)
-    for val, fileName in enumerate(files):
-        print("Now: {} {}/{}".format(fileName, val, n))
+    for val, fileName in tqdm(enumerate(files), total=len(files)):
+        # print("Now: {} {}/{}".format(fileName, val, n))
         importQuest(fileName)
     conn.commit()
 
@@ -191,7 +156,24 @@ def importChapters():
     conn.commit()
 
 
+def main():
+    print("Importing talks...")
+    importAllTalkItems()
+    print("Importing avatars...")
+    importAvatars()
+    print("Importing fetters...")
+    importFetters()
+    print("Importing quests...")
+    importAllQuests()
+    print("Importing chapters...")
+    importChapters()
+    print("Importing voices...")
+    voiceItemImport.loadAvatars()
+    voiceItemImport.importAllVoiceItems()
+    print("Done!")
+
+
 if __name__ == "__main__":
-    # importChapters()
+    main()
     pass
 

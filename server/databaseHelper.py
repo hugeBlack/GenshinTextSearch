@@ -2,7 +2,7 @@ import sqlite3
 from contextlib import closing
 
 # 没人会给一个词典搞高并发吧？
-conn = sqlite3.connect("test.db", check_same_thread=False)
+conn = sqlite3.connect(r"Z:\data.db", check_same_thread=False)
 
 
 def selectTextMapFromKeyword(keyWord: str, langCode: int):

@@ -39,7 +39,7 @@ let userInfo = reactive({
         user_name: "未登录",
         user_id: 123456,
         user_group: "none",
-        avatar_url: "/webstatic/defaultAvatar.png",
+        avatar_url: "/webstatic/defaultAvatar.jpg",
         unread_notification: false,
         verified: false
     }
@@ -101,7 +101,7 @@ watch(router.currentRoute, () => {
         <div class="headerHolder">
             <div class="leftTitle">
                 <!--                <img alt="" src="../assets/logo.png">-->
-                Genshin Sentence
+                Genshin Text Search
             </div>
 
         </div>

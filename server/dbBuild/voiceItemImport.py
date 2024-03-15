@@ -1,31 +1,28 @@
 import os
 import sqlite3
 import json
-from contextlib import closing
+from DBConfig import conn, DATA_PATH
+from tqdm import tqdm
 
-DATA_PATH = r'G:\AnimeGameData'
-
-conn = sqlite3.connect("../test.db")
-
-avatars: 'list[tuple[int,str]]' = []
 
 # 去掉switch的角色名->角色ID
 avatarMappings = {}
 
 
 def loadAvatars():
-    global avatars
-    sql1 = "select avatarId,content from avatar, textMap where avatarId<11000000 and textMap.lang=4 and avatar.nameTextMapHash=textMap.hash"
-    cursor = conn.cursor()
-    ans = cursor.execute(sql1)
-    for avatar in ans:
-        avatars.append((avatar[0], avatar[1].replace(" ", "").lower()))
+    global avatarMappings
+    avatarsJson = json.load(open(DATA_PATH + "\\ExcelBinOutput\\AvatarExcelConfigData.json", encoding='utf-8'))
 
-    # 特殊处理
-    avatarMappings['qin'] = 10000003
-    avatarMappings['ambor'] = 10000021
-    avatarMappings['hero'] = 10000005
-    avatarMappings['heroine'] = 10000007
+    for avatar in avatarsJson:
+        # 从icon里面拿名字
+        avatarId = avatar['id']
+        if avatarId >= 11000000:
+            continue
+
+        avatarName = avatar['iconName'][14:].lower()
+
+        avatarMappings[avatarName] = avatarId
+
 
 
 def getAvatarIdFromVoiceItemAvatarName(avatarNameFromVoiceItem: str):
@@ -35,7 +32,21 @@ def getAvatarIdFromVoiceItemAvatarName(avatarNameFromVoiceItem: str):
         return 0
 
     rawNameTranslate = {
-        "tartaglia_melee": 'tartaglia'
+        'hero': 'playerboy',
+        'heroine': 'playergirl',
+        "tartaglia_melee": 'tartaglia',
+        "alhaitham": "alhatham",
+        'baizhu': 'baizhuer',
+        'heizou': 'heizo',
+        'kirara': 'momoka',
+        'kujousara': 'sara',
+        'lynette': 'linette',
+        'lyney': 'liney',
+        'raidenshogun': 'shougun',
+        'thoma': 'tohma',
+        'yaemiko': 'yae',
+        'yanfei': 'feiyan',
+        'xianyun': 'liuyun'
     }
     if rawName in rawNameTranslate:
         rawName = rawNameTranslate[rawName]
@@ -43,12 +54,7 @@ def getAvatarIdFromVoiceItemAvatarName(avatarNameFromVoiceItem: str):
     if rawName in avatarMappings:
         return avatarMappings[rawName]
 
-    for avatar in avatars:
-        if avatar[1].find(rawName) != -1:
-            avatarMappings[rawName] = avatar[0]
-            return avatar[0]
-
-    raise Exception("AVATAR NOT FOUND!")
+    raise Exception("AVATAR NOT FOUND! {}".format(rawName))
 
 
 def importVoiceItem(fileName: str):
@@ -105,9 +111,14 @@ def importVoiceItem(fileName: str):
 def importAllVoiceItems():
     files = os.listdir(DATA_PATH + "\\BinOutput\\Voice\\Items\\")
     n = len(files)
-    for val, fileName in enumerate(files):
-        print("Now: {} {}/{}".format(fileName, val, n))
-        importVoiceItem(fileName)
+    for val, fileName in tqdm(enumerate(files), total=len(files)):
+        # print("Now: {} {}/{}".format(fileName, val, n))
+        try:
+            importVoiceItem(fileName)
+        except Exception as e:
+            print(e)
+            print(fileName)
+            return
 
 
 if __name__ == "__main__":
