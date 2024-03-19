@@ -193,7 +193,6 @@ const onVoicePlay = (voiceUrl) => {
         }
 
     }else{
-        voicePlayer.value.pause()
         audio.value = [voiceUrl]
         // 要等一会才能播放
         setTimeout(()=>{

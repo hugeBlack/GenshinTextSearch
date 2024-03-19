@@ -10,6 +10,8 @@ const props = defineProps(['text', 'keyword'])
  */
 const textWrapper = ref(null)
 
+const loweredKeyword = ref("")
+
 const getLines = (translate) => {
     return translate.split("\\n")
 }
@@ -56,7 +58,7 @@ const myDomElementIterate = (myDomElement) => {
     for(let child of myDomElement.children){
         if(typeof child === 'string'){
             if(props.keyword){
-                let indices = getAllOccurrences(child, props.keyword);
+                let indices = getAllOccurrences(child.toLowerCase(), loweredKeyword.value);
                 if (indices.length === 0){
                     container.append(child)
                 }else{
@@ -66,7 +68,7 @@ const myDomElementIterate = (myDomElement) => {
                             break
                         container.append(child.substring(i, sub))
                         let keywordContainer = document.createElement('span')
-                        keywordContainer.append(props.keyword)
+                        keywordContainer.append(child.substring(sub, sub + props.keyword.length))
                         keywordContainer.classList.add("keywordSpan")
                         container.append(keywordContainer)
                         i = sub + props.keyword.length
@@ -88,6 +90,7 @@ const myDomElementIterate = (myDomElement) => {
 }
 
 const regenerateWrapperDom = (text) => {
+    loweredKeyword.value = props.keyword.toLowerCase()
     while(textWrapper.value.lastChild){
         textWrapper.value.removeChild(textWrapper.value.lastChild)
     }
