@@ -15,7 +15,7 @@ import StylizedText from "@/components/StylizedText.vue";
  *             }
  *         },
  */
-const props = defineProps(['translateObj'])
+const props = defineProps(['translateObj', 'keyword'])
 const emit = defineEmits(['onVoicePlay'])
 
 
@@ -48,7 +48,7 @@ const onVoicePlay = (voiceUrl) => {
                 </span>
 
             </p>
-            <StylizedText :text="translate" />
+            <StylizedText :text="translate" :keyword="$props.keyword"/>
         </div>
         <p class="info">
             <span class="origin">来源：{{props.translateObj.origin}}</span>

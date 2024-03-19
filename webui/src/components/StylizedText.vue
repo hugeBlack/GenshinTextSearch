@@ -2,7 +2,7 @@
 import * as textStyleParser from '@/assets/textStyleParse'
 import {onBeforeMount, onMounted, ref, watch} from "vue";
 
-const props = defineProps(['text'])
+const props = defineProps(['text', 'keyword'])
 
 /**
  *
@@ -12,6 +12,25 @@ const textWrapper = ref(null)
 
 const getLines = (translate) => {
     return translate.split("\\n")
+}
+
+/**
+ * @param str{String}
+ * @param kw{String}
+ */
+const getAllOccurrences = (str, kw) => {
+    let ans = []
+    if(!str) return ans
+
+    let i = 0;
+    while(i !== -1){
+        i = str.indexOf(kw, i);
+        if(i !== -1){
+            ans.push(i)
+            i += kw.length
+        }
+    }
+    return ans;
 }
 
 /**
@@ -36,7 +55,31 @@ const myDomElementIterate = (myDomElement) => {
 
     for(let child of myDomElement.children){
         if(typeof child === 'string'){
-            container.append(child)
+            if(props.keyword){
+                let indices = getAllOccurrences(child, props.keyword);
+                if (indices.length === 0){
+                    container.append(child)
+                }else{
+                    let i = 0
+                    for(let sub of indices){
+                        if(i >= child.length)
+                            break
+                        container.append(child.substring(i, sub))
+                        let keywordContainer = document.createElement('span')
+                        keywordContainer.append(props.keyword)
+                        keywordContainer.classList.add("keywordSpan")
+                        container.append(keywordContainer)
+                        i = sub + props.keyword.length
+                    }
+                    if(i < child.length){
+                        container.append(child.substring(i))
+                    }
+                }
+            } else {
+                container.append(child)
+            }
+
+
         }else{
             container.append(myDomElementIterate(child))
         }

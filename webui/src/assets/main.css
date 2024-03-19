@@ -105,3 +105,8 @@ input[type=number]::-webkit-outer-spin-button {
 .writableEditor .ProseMirror img.ProseMirror-selectednode {
     outline: 3px solid var(--el-color-primary);
 }
+
+.keywordSpan {
+    font-weight: bold;
+    color: #ffba73
+}
