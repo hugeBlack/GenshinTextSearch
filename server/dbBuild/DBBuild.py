@@ -5,9 +5,10 @@ from DBConfig import conn, DATA_PATH
 import voiceItemImport
 from tqdm import tqdm
 
+
 def importTalk(fileName: str):
     cursor = conn.cursor()
-    obj = json.load(open(DATA_PATH + "\\BinOutput\\Talk\\Quest\\" + fileName, encoding='utf-8'))
+    obj = json.load(open(DATA_PATH + "\\BinOutput\\Talk\\" + fileName, encoding='utf-8'))
 
     if 'talkId' in obj:
         talkIdKey = 'talkId'
@@ -56,11 +57,16 @@ def importTalk(fileName: str):
 
 
 def importAllTalkItems():
-    files = os.listdir(DATA_PATH + "\\BinOutput\\Talk\\Quest\\")
-    n = len(files)
-    for val, fileName in tqdm(enumerate(files), total=len(files)):
-        # print("Now: {} {}/{}".format(fileName, val, n))
-        importTalk(fileName)
+    folders = os.listdir(DATA_PATH + "\\BinOutput\\Talk\\")
+    for folder in folders:
+        if not os.path.isdir(DATA_PATH + "\\BinOutput\\Talk\\" + folder):
+            continue
+
+        files = os.listdir(DATA_PATH + "\\BinOutput\\Talk\\" + folder)
+        print("importing talk " + folder)
+        for val, fileName in tqdm(enumerate(files), total=len(files)):
+            # print("Now: {} {}/{}".format(fileName, val, n))
+            importTalk(folder + "\\" + fileName)
 
 
 def importAvatars():

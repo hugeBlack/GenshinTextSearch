@@ -68,7 +68,13 @@ def importVoiceItem(fileName: str):
         p3 = None
         p4 = None
 
-        if 'Guid' in content:
+        if 'guid' in content:
+            p1 = 'gameTriggerArgs'
+            p2 = 'sourceNames'
+            p3 = 'sourceFileName'
+            p4 = 'gameTrigger'
+        
+        elif 'Guid' in content:
             p1 = 'gameTriggerArgs'
             p2 = 'SourceNames'
             p3 = 'sourceFileName'
