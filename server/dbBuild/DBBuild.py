@@ -16,7 +16,7 @@ def importTalk(fileName: str):
         dialogueIdKey = 'id'
         talkRoleKey = 'talkRole'
         talkRoleTypeKey = 'type'
-        talkRoleIdKey = 'id'
+        talkRoleIdKey = '_id'
         talkContentTextMapHashKey = 'talkContentTextMapHash'
     elif 'FEOACBMDCKJ' in obj:
         talkIdKey = 'FEOACBMDCKJ'
@@ -162,11 +162,25 @@ def importChapters():
     conn.commit()
 
 
+def importNPCs():
+    cursor = conn.cursor()
+    NPCs = json.load(open(DATA_PATH + "\\ExcelBinOutput\\NpcExcelConfigData.json", encoding='utf-8'))
+    sql1 = "insert into npc(npcId, textHash) values (?,?)"
+
+    for npc in NPCs:
+        cursor.execute(sql1, (npc['id'], npc['nameTextMapHash']))
+
+    cursor.close()
+    conn.commit()
+
+
 def main():
     print("Importing talks...")
     importAllTalkItems()
     print("Importing avatars...")
     importAvatars()
+    print("Importing NPCs...")
+    importNPCs()
     print("Importing fetters...")
     importFetters()
     print("Importing quests...")
@@ -180,6 +194,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    # importAllTalkItems()
+    importNPCs()
     pass
 

@@ -131,6 +131,21 @@ create index voice_dialogueId_index
     on voice (dialogueId);
 
 
+create table main.npc
+(
+    id       integer
+        constraint npc_pk
+            primary key autoincrement,
+    npcId    integer
+        constraint npc_pk_2
+            unique,
+    textHash integer
+);
+
+create index main.npc_npcId_index
+    on main.npc (npcId);
+
+
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (1, 'TextMapCHS.json', '简体中文', 0);
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (2, 'TextMapCHT.json', '繁體中文', 0);
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (3, 'TextMapDE.json', 'Deutsch', 0);
