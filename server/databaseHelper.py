@@ -100,20 +100,72 @@ def getSourceFromFetter(textHash: int, langCode: int = 1):
             return None
         avatarName = ans2[0][0]
 
-        cursor.close()
         return "{} · {}".format(avatarName, voiceTitle)
+
+
+wanderNames = {}
+travellerNames = {}
+
+
+# 获得散兵名字
+def getWanderName(langCode: int = 1):
+    if langCode in wanderNames:
+        return wanderNames[langCode]
+
+    with closing(conn.cursor()) as cursor:
+        # 接下来获得角色名称
+        sql2 = 'select content from avatar, textMap where avatarId=10000075 and avatar.nameTextMapHash=textMap.hash and lang=?'
+
+        cursor.execute(sql2, (langCode,))
+        ans2 = cursor.fetchall()
+        if len(ans2) == 0:
+            return None
+        wanderNames[langCode] = ans2[0][0]
+        return ans2[0][0]
+
+
+# 获得旅行者名字
+def getTravellerName(langCode: int = 1):
+    if langCode in travellerNames:
+        return travellerNames[langCode]
+
+    with closing(conn.cursor()) as cursor:
+        # 接下来获得角色名称
+        sql2 = 'select content from avatar, textMap where avatarId=10000005 and avatar.nameTextMapHash=textMap.hash and lang=?'
+
+        cursor.execute(sql2, (langCode,))
+        ans2 = cursor.fetchall()
+        if len(ans2) == 0:
+            return None
+        travellerNames[langCode] = ans2[0][0]
+        return ans2[0][0]
 
 
 # 如果是任务对话，则返回章节号+章节名+任务名，否则返回None
 def getSourceFromDialogue(textHash: int, langCode: int = 1):
     with closing(conn.cursor()) as cursor:
         # 先搞到talkId
-        sql1 = 'select talkId from dialogue where textHash=?'
+        sql1 = 'select talkerType, talkerId, talkId from dialogue where textHash=?'
         cursor.execute(sql1, (textHash,))
         ans = cursor.fetchall()
         if len(ans) == 0:
             return None
-        talkId = ans[0][0]
+        talkerType, talkerId, talkId = ans[0]
+        # 根据talkerType和Id找到说话人的名称
+        talkerName = None
+        if talkerType == "TALK_ROLE_NPC":
+            sqlGetNpcName = 'select content from npc, textMap indexed by textMap_hash_index where npcId = ? and textHash = hash and lang = ?'
+            cursor.execute(sqlGetNpcName, (talkerId, langCode))
+            ansNpcName = cursor.fetchall()
+            if len(ansNpcName) > 0:
+                talkerName = ansNpcName[0][0]
+        elif talkerType == "TALK_ROLE_PLAYER":
+            talkerName = "主角"
+        elif talkerType == "TALK_ROLE_MATE_AVATAR":
+            talkerName = "反主"
+
+        if talkerName == '#{REALNAME[ID(1)|HOSTONLY(true)]}':
+            talkerName = getWanderName(langCode)
 
         # 搞到questId，与任务的标题
         sql2 = ('select quest.questId, content from questTalk, quest, textMap '
@@ -121,8 +173,12 @@ def getSourceFromDialogue(textHash: int, langCode: int = 1):
         cursor.execute(sql2, (talkId, langCode))
         ans2 = cursor.fetchall()
         if len(ans2) == 0:
-            # 应该不会出现吧？
-            return "任务文本"
+            # 如果查询到没有属于某个任务的talk就会到这里
+            if talkerName is None:
+                return "对话文本"
+            else:
+                return f"{talkerName}, 对话文本"
+
         questId, questTitle = ans2[0]
 
         # 尝试找到任务属于哪个章节
@@ -148,6 +204,22 @@ def getSourceFromDialogue(textHash: int, langCode: int = 1):
 
         if len(ans5) > 0:
             chapterNumText = ans5[0][0]
-            return '{} · {} · {}'.format(chapterNumText, chapterTitleText, questTitle)
+            questCompleteName = '{} · {} · {}'.format(chapterNumText, chapterTitleText, questTitle)
         else:
-            return '{} · {}'.format(chapterTitleText, questTitle)
+            questCompleteName = '{} · {}'.format(chapterTitleText, questTitle)
+
+        if talkerName is None:
+            return questCompleteName
+        else:
+            return f"{talkerName}, {questCompleteName}"
+
+
+def getManualTextMap(placeHolderName, lang):
+    with closing(conn.cursor()) as cursor:
+        sql1 = 'select content from manualTextMap, textMap where textMapId=? and textHash = hash and lang=?'
+        cursor.execute(sql1, (placeHolderName, lang))
+        ans = cursor.fetchall()
+        if len(ans) > 0:
+            return ans[0][0]
+        else:
+            return None

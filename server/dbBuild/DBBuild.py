@@ -174,6 +174,18 @@ def importNPCs():
     conn.commit()
 
 
+def importManualTextMap():
+    cursor = conn.cursor()
+    placeholders = json.load(open(DATA_PATH + "\\ExcelBinOutput\\ManualTextMapConfigData.json", encoding='utf-8'))
+    sql1 = "insert into manualTextMap(textMapId, textHash) values (?,?)"
+
+    for placeholder in placeholders:
+        cursor.execute(sql1, (placeholder['textMapId'], placeholder['textMapContentTextMapHash']))
+
+    cursor.close()
+    conn.commit()
+
+
 def main():
     print("Importing talks...")
     importAllTalkItems()
@@ -181,6 +193,8 @@ def main():
     importAvatars()
     print("Importing NPCs...")
     importNPCs()
+    print("Importing ManualTextMap...")
+    importManualTextMap()
     print("Importing fetters...")
     importFetters()
     print("Importing quests...")
@@ -194,8 +208,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    # importAllTalkItems()
-    importNPCs()
+    main()
     pass
 

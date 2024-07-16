@@ -3,6 +3,7 @@ import io
 import databaseHelper
 import languagePackReader
 import config
+import placeholderHandler
 
 
 def selectVoicePathFromTextHash(textHash: int):
@@ -43,7 +44,11 @@ def getTranslateObj(keyword: str, langCode: int):
         obj = {'translates': {}, 'voicePaths': []}
         translates = databaseHelper.selectTextMapFromTextHash(content[0], langs)
         for translate in translates:
-            obj['translates'][translate[1]] = translate[0]
+            # #开头的要进行占位符替换
+            if translate[0].startswith("#"):
+                obj['translates'][translate[1]] = placeholderHandler.replace(translate[0], False, translate[1])
+            else:
+                obj['translates'][translate[1]] = translate[0]
 
         voicePath = selectVoicePathFromTextHash(content[0])
         origin = selectVoiceOriginFromTextHash(content[0], sourceLangCode)

@@ -146,6 +146,21 @@ create index main.npc_npcId_index
     on main.npc (npcId);
 
 
+create table main.manualTextMap
+(
+    id        integer
+        constraint manualTextMap_pk
+            primary key,
+    textMapId text,
+    textHash  integer
+);
+
+create unique index main.manualTextMap_textMapId_uindex
+    on main.manualTextMap (textMapId);
+
+
+
+
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (1, 'TextMapCHS.json', '简体中文', 0);
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (2, 'TextMapCHT.json', '繁體中文', 0);
 INSERT INTO langCode (id, codeName, displayName, imported) VALUES (3, 'TextMapDE.json', 'Deutsch', 0);
