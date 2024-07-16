@@ -46,7 +46,8 @@ def getAvatarIdFromVoiceItemAvatarName(avatarNameFromVoiceItem: str):
         'thoma': 'tohma',
         'yaemiko': 'yae',
         'yanfei': 'feiyan',
-        'xianyun': 'liuyun'
+        'xianyun': 'liuyun',
+        'emelie': 'emilie'
     }
     if rawName in rawNameTranslate:
         rawName = rawNameTranslate[rawName]
@@ -67,30 +68,35 @@ def importVoiceItem(fileName: str):
         p2 = None
         p3 = None
         p4 = None
+        guidKeyName = None
 
         if 'guid' in content:
             p1 = 'gameTriggerArgs'
             p2 = 'sourceNames'
             p3 = 'sourceFileName'
             p4 = 'gameTrigger'
+            guidKeyName = 'guid'
         
         elif 'Guid' in content:
             p1 = 'gameTriggerArgs'
             p2 = 'SourceNames'
             p3 = 'sourceFileName'
             p4 = 'GameTrigger'
+            guidKeyName = 'Guid'
 
         elif 'JFNDAOJCHPO' in content:
             p1 = 'FMHLBONJKPJ'
             p2 = 'OFEEIPOMNKD'
             p3 = 'CBGLAJNLFCB'
             p4 = 'BFKCDJLLGNJ'
+            guidKeyName = 'JFNDAOJCHPO'
 
         elif 'HLGGFCENLPA' in content:
             p1 = 'FFDHLEAFBLM'
             p2 = 'EIKJKDICKMJ'
             p3 = 'HLGOMILNFNK'
             p4 = 'BEHKGKMMAPD'
+            guidKeyName = 'HLGGFCENLPA'
 
         if p2 not in content or p1 not in content:
             continue
@@ -104,7 +110,7 @@ def importVoiceItem(fileName: str):
 
             avatarId = 0
             # 没啥好办法，通过avatarName获得角色名称，再转换为角色id
-            if 'Guid' in content and voice['avatarName'] != '':
+            if guidKeyName in content and voice['avatarName'] != '':
                 avatarId = getAvatarIdFromVoiceItemAvatarName(voice['avatarName'])
                 # print(voice['avatarName'], avatarId)
 

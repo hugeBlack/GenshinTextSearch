@@ -36,12 +36,11 @@ const getAllOccurrences = (str, kw) => {
 }
 
 /**
- * 返回一个span dom
- * @param myDomElement{textStyleParser.MyDomElement}
+ * 根据传入的myDomElement构造一个一层的container Dom元素
+ * @param myDomElement{textStyleParser.MyDomElement} 正在处理的myDomElement
  * @return HTMLSpanElement
  */
-
-const myDomElementIterate = (myDomElement) => {
+const createElementByMyElement = (myDomElement) => {
     let container = document.createElement('span')
     if (myDomElement.tagName === ''){
 
@@ -54,39 +53,93 @@ const myDomElementIterate = (myDomElement) => {
     }else{
         console.log(`unknown tag name ${myDomElement.tagName}`)
     }
+    return container
+}
+
+/**
+ * 返回一个span dom
+ * @param myDomElement{textStyleParser.MyDomElement} 正在处理的myDomElement
+ * @param lineHtmlElements {HTMLParagraphElement[]} 所有的p元素，一开始得有一个在里面
+ * @param containerStack {HTMLElement[]} container dom元素的栈，一开始是初始的p元素，会把最后一个元素作为容器元素
+ * @param currentLabelStack {textStyleParser.MyDomElement[]} 当前样式栈
+ */
+
+const myDomElementIterate = (myDomElement, lineHtmlElements, containerStack, currentLabelStack) => {
+    let container = containerStack[containerStack.length - 1]
+    if(myDomElement.tagName !== 'root')
+        currentLabelStack.push(myDomElement)
 
     for(let child of myDomElement.children){
         if(typeof child === 'string'){
-            if(props.keyword){
-                let indices = getAllOccurrences(child.toLowerCase(), loweredKeyword.value);
-                if (indices.length === 0){
-                    container.append(child)
-                }else{
-                    let i = 0
-                    for(let sub of indices){
-                        if(i >= child.length)
-                            break
-                        container.append(child.substring(i, sub))
-                        let keywordContainer = document.createElement('span')
-                        keywordContainer.append(child.substring(sub, sub + props.keyword.length))
-                        keywordContainer.classList.add("keywordSpan")
-                        container.append(keywordContainer)
-                        i = sub + props.keyword.length
+            let lines = getLines(child)
+
+            for(let i = 0; i < lines.length; ++i) {
+                let line = lines[i];
+                // 遇到换行，要复制一颗格式树，即要修改containerStack的所有内容
+                if(i > 0) {
+                    let newP = document.createElement('p')
+                    lineHtmlElements.push(newP)
+                    containerStack[0] = newP
+
+                    /**
+                     * @type {HTMLSpanElement}
+                     */
+                    let newContainer = undefined
+                    let i = 1
+                    for(let curDomElement of currentLabelStack){
+                        if(newContainer) {
+                            let nowContainer = createElementByMyElement(curDomElement)
+                            newContainer.append(nowContainer)
+                            newContainer = nowContainer
+                            container = nowContainer
+                        } else {
+                            newContainer = createElementByMyElement(curDomElement)
+                            container = newContainer
+                            newP.append(newContainer)
+                        }
+                        containerStack[i] = newContainer
+                        ++i;
                     }
-                    if(i < child.length){
-                        container.append(child.substring(i))
-                    }
+
                 }
-            } else {
-                container.append(child)
+
+                // 高亮搜索关键字
+                if(props.keyword){
+                    let indices = getAllOccurrences(line.toLowerCase(), loweredKeyword.value);
+                    if (indices.length === 0){
+                        container.append(line)
+                    }else{
+                        let i = 0
+                        for(let sub of indices){
+                            if(i >= line.length)
+                                break
+                            container.append(line.substring(i, sub))
+                            let keywordContainer = document.createElement('span')
+                            keywordContainer.append(line.substring(sub, sub + props.keyword.length))
+                            keywordContainer.classList.add("keywordSpan")
+                            container.append(keywordContainer)
+                            i = sub + props.keyword.length
+                        }
+                        if(i < line.length){
+                            container.append(line.substring(i))
+                        }
+                    }
+                } else {
+                    container.append(line)
+                }
             }
 
 
         }else{
-            container.append(myDomElementIterate(child))
+            let childContainer = createElementByMyElement(child)
+            containerStack.push(childContainer)
+            container.append(childContainer)
+            myDomElementIterate(child, lineHtmlElements, containerStack, currentLabelStack)
         }
     }
-    return container
+    currentLabelStack.pop()
+    containerStack.pop()
+
 }
 
 const regenerateWrapperDom = (text) => {
@@ -94,18 +147,18 @@ const regenerateWrapperDom = (text) => {
     while(textWrapper.value.lastChild){
         textWrapper.value.removeChild(textWrapper.value.lastChild)
     }
-    let lines = getLines(text)
-    for(let line of lines){
-        /**
-         * @type {textStyleParser.MyDomElement[]}
-         */
-        let result = textStyleParser.parse(line)
-        let p = document.createElement('p')
-        for(let element of result){
-            p.append(myDomElementIterate(element))
-        }
-        textWrapper.value.append(p)
-    }
+
+    let result = new textStyleParser.MyDomElement();
+    result.children = textStyleParser.parse(text)
+    result.tagName = 'root'
+    let p = document.createElement('p')
+    let lineElements = [p]
+    let containerElements = [p]
+    let currentLabelStack = []
+    myDomElementIterate(result, lineElements, containerElements, currentLabelStack)
+    for(let element of lineElements)
+        textWrapper.value.append(element)
+
 
 }
 

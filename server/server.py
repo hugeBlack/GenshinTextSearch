@@ -65,6 +65,21 @@ def getVoiceOver():
     )
 
 
+@app.route("/api/getTalkFromHash", methods=['POST'])
+def getTalkFromHash():
+    langCode = request.json['langCode']
+    textHash: int = request.json['textHash']
+
+    start = time.time()
+    contents = controllers.getTalkFromHash(textHash, langCode)
+    end = time.time()
+
+    return buildResponse({
+        'contents': contents,
+        'time': (end - start)*1000
+    })
+
+
 @app.route("/api/saveSettings", methods=['POST'])
 def saveSettings():
     newConfig = request.json['config']

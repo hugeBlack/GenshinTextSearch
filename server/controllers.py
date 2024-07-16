@@ -18,17 +18,17 @@ def selectVoicePathFromTextHash(textHash: int):
     return None
 
 
-def selectVoiceOriginFromTextHash(textHash: int, langCode: int):
+def selectVoiceOriginFromTextHash(textHash: int, langCode: int) -> tuple[str, bool]:
     origin = databaseHelper.getSourceFromDialogue(textHash, langCode)
     if origin is not None:
-        return origin
+        return origin, True
 
     origin = databaseHelper.getSourceFromFetter(textHash, langCode)
     if origin is not None:
-        return origin
+        return origin, False
 
     # TODO 支持更多类型的语音
-    return "其他文本"
+    return "其他文本", False
 
 
 def getTranslateObj(keyword: str, langCode: int):
@@ -41,7 +41,7 @@ def getTranslateObj(keyword: str, langCode: int):
     sourceLangCode = config.getSourceLanguage()
 
     for content in contents:
-        obj = {'translates': {}, 'voicePaths': []}
+        obj = {'translates': {}, 'voicePaths': [], 'isTalk': False, 'hash': content[0]}
         translates = databaseHelper.selectTextMapFromTextHash(content[0], langs)
         for translate in translates:
             # #开头的要进行占位符替换
@@ -51,7 +51,8 @@ def getTranslateObj(keyword: str, langCode: int):
                 obj['translates'][translate[1]] = translate[0]
 
         voicePath = selectVoicePathFromTextHash(content[0])
-        origin = selectVoiceOriginFromTextHash(content[0], sourceLangCode)
+        origin, isTalk = selectVoiceOriginFromTextHash(content[0], sourceLangCode)
+        obj['isTalk'] = isTalk
 
         if voicePath is not None:
             voiceExist = False
@@ -68,6 +69,11 @@ def getTranslateObj(keyword: str, langCode: int):
         ans.append(obj)
 
     return ans
+
+
+# 根据hash值查询整个对话的内容
+def getTalkFromHash(textHash, langCode):
+    return None
 
 
 def getVoiceBinStream(voicePath, langCode):
@@ -116,3 +122,6 @@ def setSourceLanguage(newSourceLanguage):
 
 def setIsMale(isMale: bool):
     config.setIsMale(isMale)
+
+
+
