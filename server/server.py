@@ -77,6 +77,9 @@ def saveSettings():
     if 'sourceLanguage' in newConfig:
         controllers.setSourceLanguage(newConfig['sourceLanguage'])
 
+    if 'isMale' in newConfig:
+        controllers.setIsMale(newConfig['isMale'])
+
     controllers.saveConfig()
 
     return buildResponse(controllers.getConfig())

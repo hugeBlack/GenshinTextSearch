@@ -46,7 +46,7 @@ def getTranslateObj(keyword: str, langCode: int):
         for translate in translates:
             # #开头的要进行占位符替换
             if translate[0].startswith("#"):
-                obj['translates'][translate[1]] = placeholderHandler.replace(translate[0], False, translate[1])
+                obj['translates'][translate[1]] = placeholderHandler.replace(translate[0], config.getIsMale(), translate[1])
             else:
                 obj['translates'][translate[1]] = translate[0]
 
@@ -112,3 +112,7 @@ def saveConfig():
 
 def setSourceLanguage(newSourceLanguage):
     config.setSourceLanguage(newSourceLanguage)
+
+
+def setIsMale(isMale: bool):
+    config.setIsMale(isMale)

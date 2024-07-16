@@ -21,6 +21,11 @@
             <el-form-item label="结果语言">
                 <el-transfer v-model="transferComponentValue" :data="transferComponentData" :titles="['可选语言', '已选语言']"/>
             </el-form-item>
+            <el-form-item label="双子">
+                <el-select v-model="selectedTwin" placeholder="Select" class="languageSelector" >
+                    <el-option v-for="(v,k) in twinList" :label="v.label" :value="v.value" :key="k"/>
+                </el-select>
+            </el-form-item>
             <el-form-item label="游戏资源路径">
                 {{ global.config.assetDir }}
             </el-form-item>
@@ -48,6 +53,17 @@ import {ElMessage} from "element-plus";
 const selectedInputLanguage = ref(global.config.defaultSearchLanguage + '')
 const selectedSourceLanguage = ref(global.config.sourceLanguage + '')
 const supportedInputLanguage = ref({})
+const twinList = ref([
+    {
+        "value": false,
+        "label": "荧"
+    },
+    {
+        "value": true,
+        "label": "空"
+    }
+])
+const selectedTwin = ref(global.config.isMale)
 
 const transferComponentData = ref([])
 const transferComponentValue = ref([])
@@ -75,11 +91,12 @@ onBeforeMount(async ()=>{
 })
 
 const save = async () => {
-    let newConfig = (await api.saveConfig(transferComponentValue.value, selectedInputLanguage.value, selectedSourceLanguage.value)).json
+    let newConfig = (await api.saveConfig(transferComponentValue.value, selectedInputLanguage.value, selectedSourceLanguage.value, selectedTwin.value)).json
 
     global.config.resultLanguages = newConfig.resultLanguages
     global.config.defaultSearchLanguage = newConfig.defaultSearchLanguage
     global.config.sourceLanguage = newConfig.sourceLanguage
+    global.config.isMale = newConfig.isMale
 
     ElMessage({type: "success" ,message:"设置已保存"})
 }

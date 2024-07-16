@@ -8,7 +8,8 @@ config = {
 
     "defaultSearchLanguage": 4,
     "assetDir": "",
-    "sourceLanguage": 1
+    "sourceLanguage": 1,
+    "isMale": False
 }
 
 
@@ -31,6 +32,9 @@ def loadConfig():
     if "sourceLanguage" in fileJson and fileJson['sourceLanguage'] is int:
         config['sourceLanguage'] = fileJson['sourceLanguage']
 
+    if "isMale" in fileJson and fileJson['isMale'] is bool:
+        config['isMale'] = fileJson['isMale']
+
 
 def saveConfig():
     fp = open("config.json", encoding='utf-8', mode="w")
@@ -50,6 +54,10 @@ def setSourceLanguage(newSourceLanguage: int):
     config['sourceLanguage'] = newSourceLanguage
 
 
+def setIsMale(isMale):
+    config['isMale'] = isMale
+
+
 def getDefaultSearchLanguage():
     return config['defaultSearchLanguage']
 
@@ -66,4 +74,10 @@ def getAssetDir():
     return config['assetDir']
 
 
+def getIsMale():
+    return config['isMale']
+
+
 loadConfig()
+
+
