@@ -9,12 +9,17 @@ const emit = defineEmits(['onVoicePlay'])
 
 let audioUrl = undefined
 
-const playVoice = async ()=> {
+const getAudioUrl = async () => {
     if(!audioUrl){
         let buffer = await api.getVoiceOver(props.voicePath, props.langCode)
         audioUrl= await converter.convertBufferedArray(buffer)
 
     }
+    return audioUrl
+}
+
+const playVoice = async ()=> {
+    await getAudioUrl()
 
     emit('onVoicePlay', audioUrl)
 }
@@ -22,6 +27,7 @@ const playVoice = async ()=> {
 watch(props, ()=>{
     audioUrl = undefined;
 })
+defineExpose({'getAudioUrl':getAudioUrl})
 
 </script>
 

@@ -67,12 +67,15 @@ const getVoiceOver = async (voicePath, langCode) => {
 
 
 
-const changeRecord = (params) => {
-    return request.post("/api/volunteer/changeVolunteerInfo", params);
+const getTalkFromHash = (textHash) => {
+    return request.post("/api/getTalkFromHash", {
+        "textHash": textHash
+    });
 };
 
 export default {
     queryBaidu,
     queryByKeyword,
     getVoiceOver,
+    getTalkFromHash
 };

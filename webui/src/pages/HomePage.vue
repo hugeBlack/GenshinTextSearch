@@ -129,7 +129,11 @@ watch(router.currentRoute, () => {
             </div>
 
             <div class="content">
-                <RouterView v-if="loaded"></RouterView>
+                <router-view v-slot="{ Component }"  v-if="loaded">
+                    <keep-alive>
+                        <component :is="Component" />
+                    </keep-alive>
+                </router-view>
             </div>
         </div>
     </div>

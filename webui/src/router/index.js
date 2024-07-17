@@ -17,6 +17,11 @@ const router = createRouter({
                     path: "settings",
                     name: "settingsView",
                     component: () => import("@/views/SettingsView.vue"),
+                },
+                {
+                    path: "talk",
+                    name: "talkView",
+                    component: () => import("@/views/TalkView.vue"),
                 }
             ]
         },

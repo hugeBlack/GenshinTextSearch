@@ -2,8 +2,8 @@
 // 显示多语言翻译的组件
 import global from '@/global/global.js'
 import PlayVoiceButton from "@/components/PlayVoiceButton.vue";
-
 import StylizedText from "@/components/StylizedText.vue";
+import {useRouter} from "vue-router";
 /**
  *         {
  *             "type": "Dialogue",
@@ -17,20 +17,17 @@ import StylizedText from "@/components/StylizedText.vue";
  */
 const props = defineProps(['translateObj', 'keyword'])
 const emit = defineEmits(['onVoicePlay'])
-
+const router = useRouter()
 
 
 const onVoicePlay = (voiceUrl) => {
     emit('onVoicePlay', voiceUrl)
 }
-/**
- *
- * @type {Ref<HTMLElement>}
- */
 
-
-
-
+const gotoTalk = () => {
+    if(!props.translateObj.isTalk) return
+    router.push(`/talk?textHash=${props.translateObj.hash}&keyword=${props.keyword}`)
+}
 
 </script>
 
@@ -51,7 +48,10 @@ const onVoicePlay = (voiceUrl) => {
             <StylizedText :text="translate" :keyword="$props.keyword"/>
         </div>
         <p class="info">
-            <span class="origin">来源：{{props.translateObj.origin}}</span>
+            <span class="origin" :class="{talkOrigin: props.translateObj.isTalk}" @click="gotoTalk">
+                来源：{{props.translateObj.origin}}
+                <span class="gotoIcon" v-if="props.translateObj.isTalk">&gt</span>
+            </span>
         </p>
     </div>
 
@@ -77,5 +77,22 @@ const onVoicePlay = (voiceUrl) => {
 
 .origin{
     color: #ab9d96;
+}
+
+.talkOrigin {
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.talkOrigin:hover {
+    opacity: 0.8;
+}
+
+.talkOrigin>.gotoIcon {
+    transition: 0.3s;
+    margin-left: 0;
+}
+.talkOrigin:hover>.gotoIcon {
+    padding-left: 5px;
 }
 </style>

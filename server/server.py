@@ -67,12 +67,13 @@ def getVoiceOver():
 
 @app.route("/api/getTalkFromHash", methods=['POST'])
 def getTalkFromHash():
-    langCode = request.json['langCode']
     textHash: int = request.json['textHash']
-
-    start = time.time()
-    contents = controllers.getTalkFromHash(textHash, langCode)
-    end = time.time()
+    try:
+        start = time.time()
+        contents = controllers.getTalkFromHash(textHash)
+        end = time.time()
+    except str as e:
+        return buildResponse(code=114, msg=e)
 
     return buildResponse({
         'contents': contents,

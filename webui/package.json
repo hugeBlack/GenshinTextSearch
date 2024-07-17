@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@flaticon/flaticon-uicons": "^2.4.0",
-    "@liripeng/vue-audio-player": "^1.5.3",
+    "@liripeng/vue-audio-player": "^2.0.4",
     "axios": "^1.6.7",
     "dayjs": "^1.11.9",
     "element-plus": "^2.3.12",
@@ -19,6 +19,6 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.3.1",
-    "vite": "^5.1.4"
+    "vite": "5.2.6"
   }
 }

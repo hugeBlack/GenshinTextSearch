@@ -40,23 +40,6 @@ def selectVoicePathFromTextHashInFetter(textHash: int):
             return matches[0][0]
         elif len(matches) == 0:
             return None
-        # 不知道上面这么写有没有问题，下面先留着
-        # else:
-        #     # 有好多结果！如果能通过角色id反查，就反查，否则直接摆烂，返回第一个
-        #     if matches[0][1] == 0:
-        #         return matches[0][0]
-        #
-        #     # 查出谁说的话
-        #     sql2 = "select avatarId from fetters where voiceFileTextTextMapHash=? limit 1"
-        #     cursor.execute(sql2, (textHash,))
-        #     matches2 = cursor.fetchall()
-        #     avatarId = matches2[0][0]
-        #     for voice in matches:
-        #         if voice[1] == avatarId:
-        #             return voice[0]
-
-        # 没人说过？不对吧，返回第一个
-        # return matches[0][0]
 
 
 # 实际是从talk里拿
@@ -141,8 +124,8 @@ def getTravellerName(langCode: int = 1):
         return ans2[0][0]
 
 
-# 如果是任务对话，则返回章节号+章节名+任务名，否则返回None
-def getSourceFromDialogue(textHash: int, langCode: int = 1):
+# 通过textHash查询对话信息，返回[talkId, talkerType, talkerId]
+def getTalkInfo(textHash: int) -> 'tuple[int, str, int] | None':
     with closing(conn.cursor()) as cursor:
         # 先搞到talkId
         sql1 = 'select talkerType, talkerId, talkId from dialogue where textHash=?'
@@ -151,7 +134,12 @@ def getSourceFromDialogue(textHash: int, langCode: int = 1):
         if len(ans) == 0:
             return None
         talkerType, talkerId, talkId = ans[0]
-        # 根据talkerType和Id找到说话人的名称
+        return talkId, talkerType, talkerId
+
+
+# 根据talkerType和Id找到说话人的名称
+def getTalkerName(talkerType: str, talkerId: int, langCode: int = 1) -> 'str | None':
+    with closing(conn.cursor()) as cursor:
         talkerName = None
         if talkerType == "TALK_ROLE_NPC":
             sqlGetNpcName = 'select content from npc, textMap indexed by textMap_hash_index where npcId = ? and textHash = hash and lang = ?'
@@ -166,6 +154,12 @@ def getSourceFromDialogue(textHash: int, langCode: int = 1):
 
         if talkerName == '#{REALNAME[ID(1)|HOSTONLY(true)]}':
             talkerName = getWanderName(langCode)
+        return talkerName
+
+
+# 通过talkId尝试找到对话所属的任务全量名称
+def getTalkQuestName(talkId: int, langCode: int = 1) -> str:
+    with closing(conn.cursor()) as cursor:
 
         # 搞到questId，与任务的标题
         sql2 = ('select quest.questId, content from questTalk, quest, textMap '
@@ -174,10 +168,7 @@ def getSourceFromDialogue(textHash: int, langCode: int = 1):
         ans2 = cursor.fetchall()
         if len(ans2) == 0:
             # 如果查询到没有属于某个任务的talk就会到这里
-            if talkerName is None:
-                return "对话文本"
-            else:
-                return f"{talkerName}, 对话文本"
+            return "对话文本"
 
         questId, questTitle = ans2[0]
 
@@ -208,10 +199,24 @@ def getSourceFromDialogue(textHash: int, langCode: int = 1):
         else:
             questCompleteName = '{} · {}'.format(chapterTitleText, questTitle)
 
-        if talkerName is None:
-            return questCompleteName
-        else:
-            return f"{talkerName}, {questCompleteName}"
+        return questCompleteName
+
+
+# 如果是任务对话，则返回章节号+章节名+任务名，否则返回None
+def getSourceFromDialogue(textHash: int, langCode: int = 1):
+    talkInfo = getTalkInfo(textHash)
+    if talkInfo is None:
+        return None
+
+    talkId, talkerType, talkerId = talkInfo
+
+    talkerName = getTalkerName(talkerType, talkerId, langCode)
+    questCompleteName = getTalkQuestName(talkId, langCode)
+
+    if talkerName is None:
+        return questCompleteName
+    else:
+        return f"{talkerName}, {questCompleteName}"
 
 
 def getManualTextMap(placeHolderName, lang):
@@ -221,5 +226,17 @@ def getManualTextMap(placeHolderName, lang):
         ans = cursor.fetchall()
         if len(ans) > 0:
             return ans[0][0]
+        else:
+            return None
+
+
+# 根据talk的id查找整个talk，返回为[tuple[textHash, talkerType, talkerId, dialogueId]]
+def getTalkContent(talkId: int) -> 'list[tuple[int, str, int, int]] | None':
+    with closing(conn.cursor()) as cursor:
+        sql1 = 'select textHash, talkerType, talkerId, dialogueId from dialogue where talkId = ?'
+        cursor.execute(sql1, (talkId,))
+        ans = cursor.fetchall()
+        if len(ans) > 0:
+            return ans
         else:
             return None
