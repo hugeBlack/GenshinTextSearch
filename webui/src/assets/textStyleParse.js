@@ -86,7 +86,7 @@ function closedTagParser(text, startIndex) {
 }
 
 export function parse(text) {
-    if (text.length === 0) {
+    if (!text || text.length === 0) {
         return [];
     }
 
