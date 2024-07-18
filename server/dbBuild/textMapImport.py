@@ -27,7 +27,8 @@ def importTextMap(mapName: str):
 
     # 加数据
     sql3 = "insert or ignore into textMap(hash, content, lang) values (?,?,?)"
-    textMap = json.load(open(LANG_PATH + "\\" + mapName, encoding='utf-8'))
+    textMap = json.load(open(os.path.join(LANG_PATH, mapName), encoding='utf-8'))
+    # textMap = json.load(open(LANG_PATH + "\\" + mapName, encoding='utf-8'))
     for hashVal, content in tqdm(textMap.items(), total=len(textMap)):
         cursor.execute(sql3, (hashVal, content, langId))
 
