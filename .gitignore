@@ -2,3 +2,4 @@
 *.zip
 vgm
 .idea
+.DS_Store

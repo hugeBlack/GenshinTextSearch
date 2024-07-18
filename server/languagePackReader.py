@@ -17,8 +17,8 @@ langPackages: 'dict[int, Package]' = {}
 
 def loadLangPackages():
     paths = [
-        GENSHIN_PATH + "\\Persistent\\AudioAssets",
-        GENSHIN_PATH + "\\StreamingAssets\\AudioAssets"
+        os.path.join(GENSHIN_PATH, "Persistent", "AudioAssets"),
+        os.path.join(GENSHIN_PATH, "StreamingAssets", "AudioAssets")
     ]
 
     langToCode = {
@@ -34,7 +34,7 @@ def loadLangPackages():
         for langName, code in langToCode.items():
             if code in langPackages:
                 continue
-            langPackPath = pathDir + "\\" + langName
+            langPackPath = os.path.join(pathDir, langName)
             if not os.path.exists(langPackPath):
                 continue
             files = os.listdir(langPackPath)
@@ -43,7 +43,7 @@ def loadLangPackages():
 
             voicePack = Package()
             for fileName in files:
-                fobj = open(langPackPath + "\\" + fileName, "rb")
+                fobj = open(os.path.join(langPackPath, fileName), "rb")
                 voicePack.addfile(fobj)
             langPackages[code] = voicePack
 

@@ -1,8 +1,9 @@
 import sqlite3
 from contextlib import closing
+import os
 
 # 没人会给一个词典搞高并发吧？
-conn = sqlite3.connect(r".\data.db", check_same_thread=False)
+conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), "data.db"), check_same_thread=False)
 
 
 def selectTextMapFromKeyword(keyWord: str, langCode: int):
