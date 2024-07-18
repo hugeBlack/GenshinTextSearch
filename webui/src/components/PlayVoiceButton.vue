@@ -2,12 +2,14 @@
 import {VideoPlay} from '@element-plus/icons-vue'
 import api from "@/api/keywordQuery";
 import * as converter from "@/assets/wem2wav";
-import {watch} from "vue";
+import {ref, watch} from "vue";
 
 const props = defineProps(['voicePath', 'langCode'])
 const emit = defineEmits(['onVoicePlay'])
 
 let audioUrl = undefined
+
+const icon = ref()
 
 const getAudioUrl = async () => {
     if(!audioUrl){
@@ -16,6 +18,10 @@ const getAudioUrl = async () => {
 
     }
     return audioUrl
+}
+
+const scrollTo = () => {
+    icon.value.scrollIntoView({"behavior":"smooth", "block":"center"})
 }
 
 const playVoice = async ()=> {
@@ -27,13 +33,16 @@ const playVoice = async ()=> {
 watch(props, ()=>{
     audioUrl = undefined;
 })
-defineExpose({'getAudioUrl':getAudioUrl})
+defineExpose({'getAudioUrl':getAudioUrl, "scrollTo": scrollTo})
 
 </script>
 
 <template>
     <el-tooltip :content="voicePath">
-        <el-icon @click="playVoice"><VideoPlay /></el-icon>
+        <span ref="icon">
+            <el-icon @click="playVoice"><VideoPlay /></el-icon>
+        </span>
+
     </el-tooltip>
 </template>
 

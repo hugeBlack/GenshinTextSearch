@@ -25,6 +25,7 @@ def replace(textMap: str, playerIsMale: bool, lang: int):
     travellerName = databaseHelper.getTravellerName(lang)
     text4 = re.sub(r"\{NICKNAME}", travellerName, text3)
 
+    # 最后去掉前面的#号
     return text4
 
 

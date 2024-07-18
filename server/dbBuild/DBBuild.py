@@ -1,5 +1,5 @@
 import os
-import sqlite3
+import re
 import json
 from DBConfig import conn, DATA_PATH
 import voiceItemImport
@@ -34,7 +34,13 @@ def importTalk(fileName: str):
     if dialogueListKey not in obj or len(obj[dialogueListKey]) == 0:
         return
 
-    sql1 = "insert or ignore into dialogue(dialogueId, talkerId, talkerType, talkId, textHash) values (?,?,?,?,?)"
+    sql1 = "insert or ignore into dialogue(dialogueId, talkerId, talkerType, talkId, textHash, coopQuestId) values (?,?,?,?,?,?)"
+
+    coopMatch = re.match(r"^Coop[\\,/]([0-9]+)_[0-9]+.json$", fileName)
+    if coopMatch:
+        coopQuestId = coopMatch.group(1)
+    else:
+        coopQuestId = None
 
     for dialogue in obj[dialogueListKey]:
         dialogueId = dialogue[dialogueIdKey]
@@ -50,7 +56,7 @@ def importTalk(fileName: str):
         if talkContentTextMapHashKey not in dialogue:
             continue
         textHash = dialogue[talkContentTextMapHashKey]
-        cursor.execute(sql1, (dialogueId, talkRoleId, talkRoleType, talkId, textHash))
+        cursor.execute(sql1, (dialogueId, talkRoleId, talkRoleType, talkId, textHash, coopQuestId))
 
     cursor.close()
     conn.commit()

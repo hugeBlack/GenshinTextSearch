@@ -34,7 +34,8 @@ create table dialogue
     textHash   integer,
     dialogueId integer
         constraint dialogue_pk_2
-            unique
+            unique,
+    coopQuestId integer
 );
 
 create index dialogue_dialogueId_index

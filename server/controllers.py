@@ -37,7 +37,7 @@ def queryTextHashInfo(textHash: int, langs: 'list[int]', sourceLangCode: int, qu
     for translate in translates:
         # #开头的要进行占位符替换
         if translate[0].startswith("#"):
-            obj['translates'][translate[1]] = placeholderHandler.replace(translate[0], config.getIsMale(), translate[1])
+            obj['translates'][translate[1]] = (placeholderHandler.replace(translate[0], config.getIsMale(), translate[1]))[1:]
         else:
             obj['translates'][translate[1]] = translate[0]
 
@@ -86,10 +86,13 @@ def getTalkFromHash(textHash: int):
     langs = config.getResultLanguages()
     sourceLangCode = config.getSourceLanguage()
 
-    talkId, talkerType, talkerId = talkInfo
-    questCompleteName = databaseHelper.getTalkQuestName(talkId, sourceLangCode)
+    talkId, talkerType, talkerId, coopQuestId = talkInfo
+    if coopQuestId is None:
+        questCompleteName = databaseHelper.getTalkQuestName(talkId, sourceLangCode)
+    else:
+        questCompleteName = databaseHelper.getCoopTalkQuestName(coopQuestId, sourceLangCode)
 
-    rawDialogues = databaseHelper.getTalkContent(talkId)
+    rawDialogues = databaseHelper.getTalkContent(talkId, coopQuestId)
     dialogues = []
 
     for rawDialogue in rawDialogues:

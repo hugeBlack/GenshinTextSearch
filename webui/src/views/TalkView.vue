@@ -56,6 +56,7 @@ const autoLoop = ref(true)
 let firstShowPlayer = true
 const audio = ref([])
 const currentPlayingIndex = ref(-1)
+const autoScroll = ref(true)
 
 const onHidePlayerButtonClicked = () => {
     showPlayer.value = false
@@ -134,6 +135,14 @@ const onBeforeNextAudio = (next) => {
 
 const onPlay = () => {
     currentPlayingIndex.value = voicePlayer.value.currentPlayIndex
+    if(autoScroll.value) {
+        let dialogueId = playableDialogueIdList[currentPlayingIndex.value]
+        let langCode = Object.getOwnPropertyNames(playVoiceButtonDict)[0]
+        let voiceButton = playVoiceButtonDict[langCode][dialogueId]
+        voiceButton.scrollTo()
+    }
+
+
 }
 
 const tableRowClassName = ({row, rowIndex}) => {
@@ -184,9 +193,15 @@ onDeactivated(() => {
 
         </el-table>
 
-        <el-form-item label="自动连续播放" style="margin-top: 10px;">
-            <el-switch v-model="autoLoop" />
-        </el-form-item>
+        <el-form style="margin-top: 10px;" :inline="true">
+            <el-form-item label="自动连续播放">
+                <el-switch v-model="autoLoop" />
+            </el-form-item>
+            <el-form-item label="自动滚动">
+                <el-switch v-model="autoScroll" />
+            </el-form-item>
+        </el-form>
+
 
     </div>
 

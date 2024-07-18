@@ -173,11 +173,13 @@ onMounted(()=>{
 </script>
 
 <template>
-<div ref="textWrapper">
+<div ref="textWrapper" class="textWrapper">
 
 </div>
 </template>
 
 <style scoped>
-
+.textWrapper {
+    word-break: keep-all;
+}
 </style>
