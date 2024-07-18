@@ -132,7 +132,7 @@ create index voice_dialogueId_index
     on voice (dialogueId);
 
 
-create table main.npc
+create table npc
 (
     id       integer
         constraint npc_pk
@@ -143,11 +143,11 @@ create table main.npc
     textHash integer
 );
 
-create index main.npc_npcId_index
-    on main.npc (npcId);
+create index npc_npcId_index
+    on npc (npcId);
 
 
-create table main.manualTextMap
+create table manualTextMap
 (
     id        integer
         constraint manualTextMap_pk
@@ -156,8 +156,8 @@ create table main.manualTextMap
     textHash  integer
 );
 
-create unique index main.manualTextMap_textMapId_uindex
-    on main.manualTextMap (textMapId);
+create unique index manualTextMap_textMapId_uindex
+    on manualTextMap (textMapId);
 
 
 
