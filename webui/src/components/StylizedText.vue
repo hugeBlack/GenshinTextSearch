@@ -180,6 +180,6 @@ onMounted(()=>{
 
 <style scoped>
 .textWrapper {
-    word-break: keep-all;
+    word-break: normal;
 }
 </style>
