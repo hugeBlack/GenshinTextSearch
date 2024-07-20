@@ -3,7 +3,7 @@ import global from "@/global/global"
 import api from "@/api/keywordQuery";
 
 import {useRoute} from "vue-router";
-import {onActivated, onDeactivated, ref, watch} from "vue";
+import {onActivated, onDeactivated, reactive, ref, watch} from "vue";
 import PlayVoiceButton from "@/components/PlayVoiceButton.vue";
 import StylizedText from "@/components/StylizedText.vue";
 import AudioPlayer from "@liripeng/vue-audio-player";
@@ -41,9 +41,7 @@ const reloadTalk = () => {
     })
 }
 
-onActivated(() => {
-    reloadPage()
-})
+
 
 // 播放器相关开始
 /**
@@ -57,6 +55,15 @@ let firstShowPlayer = true
 const audio = ref([])
 const currentPlayingIndex = ref(-1)
 const autoScroll = ref(true)
+const voiceListLoadingInfo = reactive(({
+    showLoadingDialogue: false,
+    total: 1,
+    current: 0,
+    percentage: 0,
+    audioLoaded: false
+}))
+
+
 
 const onHidePlayerButtonClicked = () => {
     showPlayer.value = false
@@ -96,12 +103,28 @@ const onVoicePlay = (voiceUrl, dialogueId) => {
 const playAllLangVoice = async (langCode) => {
     let newAudios = []
     playableDialogueIdList = []
+    voiceListLoadingInfo.total = dialogues.value.length
+    voiceListLoadingInfo.current = 0
+    voiceListLoadingInfo.percentage = 0
+    if (!voiceListLoadingInfo.audioLoaded)
+        voiceListLoadingInfo.showLoadingDialogue = true
     for(let dialogue of dialogues.value) {
-        if(!playVoiceButtonDict[langCode][dialogue.dialogueId]) continue
+        if(!playVoiceButtonDict[langCode][dialogue.dialogueId]) {
+            voiceListLoadingInfo.current += 1;
+            voiceListLoadingInfo.percentage = 100 * voiceListLoadingInfo.current / voiceListLoadingInfo.total
+            continue
+        }
         let currentUrl = await playVoiceButtonDict[langCode][dialogue.dialogueId].getAudioUrl()
         newAudios.push(currentUrl)
         playableDialogueIdList.push(dialogue.dialogueId)
+        voiceListLoadingInfo.current += 1;
+        voiceListLoadingInfo.percentage = 100 * voiceListLoadingInfo.current / voiceListLoadingInfo.total
     }
+
+    voiceListLoadingInfo.showLoadingDialogue = false
+    voiceListLoadingInfo.audioLoaded = true
+
+
     if(newAudios.length === 0) return
 
     if(firstShowPlayer){
@@ -151,6 +174,11 @@ const tableRowClassName = ({row, rowIndex}) => {
     }
     return ''
 }
+
+onActivated(() => {
+    reloadPage()
+    voiceListLoadingInfo.audioLoaded = false
+})
 
 onDeactivated(() => {
     voicePlayer.value && voicePlayer.value.pause()
@@ -226,6 +254,14 @@ onDeactivated(() => {
     <div class="showPlayerButton" @click="onShowPlayerButtonClicked" v-show="!showPlayer">
         <i class="fi fi-sr-waveform-path"></i>
     </div>
+
+    <el-dialog
+        v-model="voiceListLoadingInfo.showLoadingDialogue" :width="300"
+        :show-close="false" title="下载并转换语音" :close-on-press-escape="false">
+        <el-progress :percentage="voiceListLoadingInfo.percentage">
+            {{voiceListLoadingInfo.current}} / {{voiceListLoadingInfo.total}}
+        </el-progress>
+    </el-dialog>
 
 </template>
 
