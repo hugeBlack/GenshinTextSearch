@@ -108,11 +108,18 @@ def importQuest(fileName: str):
     sql2 = 'insert into questTalk(questId, talkId) values (?,?)'
 
     if 'id' in obj:
-        keyQuestId = 'id'
-        keyTitleTextMapHash = 'titleTextMapHash'
-        keyChapterId = 'chapterId'
-        keyTalks = 'talks'
-        keyTalkId = 'id'
+        if 'EKEKACCODOE' in obj:
+            keyQuestId = 'id'
+            keyTitleTextMapHash = 'descTextMapHash'  # That's right, it seems that dim messed up the key of title in 5.0
+            keyChapterId = 'chapterId'
+            keyTalks = 'talks'
+            keyTalkId = 'id'
+        else:
+            keyQuestId = 'id'
+            keyTitleTextMapHash = 'titleTextMapHash'
+            keyChapterId = 'chapterId'
+            keyTalks = 'talks'
+            keyTalkId = 'id'
     else:
         keyQuestId = 'CCFPGAKINNB'
         keyTitleTextMapHash = 'HLAINHJACPJ'

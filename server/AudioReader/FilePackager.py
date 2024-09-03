@@ -104,6 +104,8 @@ class Package:
 	# 根据hash获取文件数据
 	def get_file_data_by_hash(self, hash_num, langid=0, mode=0, get_latest=True):
 		hash_info = self.map[mode]
+		if langid == 0:
+			langid = next(iter(hash_info))
 		hashmap = hash_info[langid]
 		if hash_num not in hashmap:
 			raise FileNotFoundError('找不到对应文件')
@@ -125,6 +127,8 @@ class Package:
 
 	def check_file_by_hash(self, hash_num, langid=0, mode=0):
 		hash_info = self.map[mode]
+		if langid == 0:
+			langid = next(iter(hash_info))
 		hashmap = hash_info[langid]
 		return hash_num in hashmap
 
